@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Search, X, Check, ArrowUpDown } from "lucide-react";
+import { useSearch } from "@/context/SearchContext";
 
 const SORT_OPTIONS = [
   { value: "", label: "Default" },
@@ -18,8 +19,7 @@ export default function CatalogToolbar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-
-  const [searchValue, setSearchValue] = useState(searchParams.get("q") || "");
+  const { searchQuery, setSearchQuery } = useSearch();
   const [sortOpen, setSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
@@ -58,9 +58,7 @@ export default function CatalogToolbar() {
   );
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const q = e.target.value;
-    setSearchValue(q);
-    pushParams({ q });
+    setSearchQuery(e.target.value);
   };
 
   const applySort = (value: string) => {
@@ -76,16 +74,13 @@ export default function CatalogToolbar() {
         <input
           type="text"
           placeholder="Search books..."
-          value={searchValue}
+          value={searchQuery}
           onChange={handleSearch}
           className="bg-transparent text-[0.8rem] text-[#1a1714] placeholder-[#c4a882] focus:outline-none w-full"
         />
-        {searchValue && (
+        {searchQuery && (
           <button
-            onClick={() => {
-              setSearchValue("");
-              pushParams({ q: "" });
-            }}
+            onClick={() => setSearchQuery("")}
             className="text-[#c4a882] hover:text-[#1a1714] transition-colors flex-shrink-0"
           >
             <X size={11} />

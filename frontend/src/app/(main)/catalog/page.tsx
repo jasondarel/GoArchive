@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useSearch } from "@/context/SearchContext";
 import BookCard, { Book } from "../../components/BookCard";
 import BookFormModal from "../../components/BookFormModal";
 import BookFilter from "../../components/BookFilter";
@@ -26,9 +27,9 @@ function SkeletonCard() {
 
 export default function CatalogPage() {
   const { user } = useAuth();
+  const { searchQuery } = useSearch();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const searchQuery = searchParams.get("q") || "";
 
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +42,6 @@ export default function CatalogPage() {
     setError(null);
     try {
       const params: Record<string, string> = {};
-      if (searchQuery) params.search = searchQuery;
       if (searchParams.get("sort")) params.sort = searchParams.get("sort")!;
       if (searchParams.get("genre")) params.genre = searchParams.get("genre")!;
       if (searchParams.get("year_min")) params.year_min = searchParams.get("year_min")!;
@@ -67,7 +67,7 @@ export default function CatalogPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery, user, searchParams]);
+  }, [user, searchParams]);
 
   useEffect(() => {
     fetchBooks();
@@ -111,6 +111,10 @@ export default function CatalogPage() {
     setShowEdit(true);
   };
 
+  const filteredBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
       {/* Page header */}
@@ -129,7 +133,7 @@ export default function CatalogPage() {
           <p className="text-sm text-[#8a7968] mt-2 font-light">
             Showing results for{" "}
             <span className="text-[#1a1714] font-medium">"{searchQuery}"</span>{" "}
-            — {books.length} {books.length === 1 ? "book" : "books"} found
+            — {filteredBooks.length} {filteredBooks.length === 1 ? "book" : "books"} found
           </p>
         )}
       </div>
@@ -173,7 +177,7 @@ export default function CatalogPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-          {books.map((book) => (
+          {filteredBooks.map((book) => (
             <BookCard
               key={book.id}
               book={book}

@@ -181,9 +181,33 @@ export default function BookDetailPage() {
             <p className="text-[0.65rem] tracking-[0.2em] uppercase text-[#c4a882] mb-2">
               Book Details
             </p>
-            <h1 className="font-serif text-4xl text-[#1a1714] leading-tight mb-6">
+            <h1 className="font-serif text-4xl text-[#1a1714] leading-tight mb-4">
               {book.title}
             </h1>
+
+            {/* Book Attributes */}
+            <div className="flex items-center gap-0 mb-6 divide-x divide-[#d4b896]/30">
+              {book.year && (
+                <div className="pr-5">
+                  <p className="text-[0.6rem] tracking-[0.18em] uppercase text-[#b0a090] mb-0.5">Year</p>
+                  <p className="text-sm font-medium text-[#1a1714]">{book.year}</p>
+                </div>
+              )}
+
+              {book.genre?.name && (
+                <div className={book.year ? "px-5" : "pr-5"}>
+                  <p className="text-[0.6rem] tracking-[0.18em] uppercase text-[#b0a090] mb-0.5">Genre</p>
+                  <p className="text-sm font-medium text-[#1a1714]">{book.genre.name}</p>
+                </div>
+              )}
+
+              {book.rating !== undefined && book.rating !== null && (
+                <div className={book.year || book.genre?.name ? "pl-5" : "pr-5"}>
+                  <p className="text-[0.6rem] tracking-[0.18em] uppercase text-[#b0a090] mb-0.5">Rating</p>
+                  <p className="text-sm font-bold text-[#1a1714]">{book.rating} <span className="text-[#c4a882]">★</span></p>
+                </div>
+              )}
+            </div>
 
             <div className="w-12 h-px bg-[#d4b896] mb-6" />
 

@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import BookCard, { Book } from "../../components/BookCard";
 import BookFilter from "../../components/BookFilter";
 import { useAuth } from "@/context/AuthContext";
+import { useSearch } from "@/context/SearchContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/axios";
 
@@ -26,6 +27,7 @@ function SkeletonCard() {
 
 export default function FavoritePage() {
   const { user, isLoading: authLoading } = useAuth();
+  const { searchQuery } = useSearch();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [books, setBooks] = useState<Book[]>([]);
@@ -43,7 +45,6 @@ export default function FavoritePage() {
     setIsLoading(true);
     try {
       const params: Record<string, string> = {};
-      if (searchParams.get("q")) params.search = searchParams.get("q")!;
       if (searchParams.get("sort")) params.sort = searchParams.get("sort")!;
       if (searchParams.get("genre")) params.genre = searchParams.get("genre")!;
       if (searchParams.get("year_min")) params.year_min = searchParams.get("year_min")!;
@@ -90,6 +91,10 @@ export default function FavoritePage() {
 
   if (!user && !authLoading) return null;
 
+  const filteredBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div>
       {/* Page header */}
@@ -120,7 +125,7 @@ export default function FavoritePage() {
             <SkeletonCard key={i} />
           ))}
         </div>
-      ) : books.length === 0 ? (
+      ) : filteredBooks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="w-16 h-16 rounded-full bg-[#ede8de] flex items-center justify-center mb-4">
             <Heart size={28} className="text-[#c4a882]" />
@@ -129,18 +134,22 @@ export default function FavoritePage() {
             No favorites yet
           </p>
           <p className="text-sm text-[#8a7968] font-light mb-6">
-            Browse the catalog and save books you love.
+            {searchQuery
+              ? `No results for "${searchQuery}". Try a different keyword.`
+              : "Browse the catalog and save books you love."}
           </p>
-          <button
-            onClick={() => router.push("/catalog")}
-            className="px-6 py-2.5 bg-[#1a1714] text-[#f5f0e8] text-[0.72rem] tracking-[0.12em] uppercase font-medium hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
-          >
-            Browse Catalog
-          </button>
+          {!searchQuery && (
+            <button
+              onClick={() => router.push("/catalog")}
+              className="px-6 py-2.5 bg-[#1a1714] text-[#f5f0e8] text-[0.72rem] tracking-[0.12em] uppercase font-medium hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
+            >
+              Browse Catalog
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-          {books.map((book) => {
+          {filteredBooks.map((book) => {
             const isRemoving = removingIds.has(book.id);
             return (
               <div

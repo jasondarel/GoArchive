@@ -8,7 +8,6 @@ const api = axios.create({
   },
 });
 
-// Attach token on every request
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
@@ -19,7 +18,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -27,7 +25,11 @@ api.interceptors.response.use(
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        window.location.href = "/login";
+        
+        const isAuthPage = window.location.pathname === "/login" || window.location.pathname === "/register";
+        if (!isAuthPage) {
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);
