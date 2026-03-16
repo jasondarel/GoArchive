@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 
+const REMOVE_ANIMATION_MS = 500; // must match CSS transition duration below
+
 function SkeletonCard() {
   return (
     <div className="flex flex-col bg-[#ede8de] border border-[#d4b896]/10 animate-pulse">
@@ -25,8 +27,8 @@ export default function FavoritePage() {
   const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [removingIds, setRemovingIds] = useState<Set<number>>(new Set());
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login");
@@ -38,7 +40,6 @@ export default function FavoritePage() {
     setIsLoading(true);
     try {
       const res = await api.get("/favorites");
-      // Backend returns a flat array of book objects with is_favorited: true
       setBooks(res.data.data ?? res.data);
     } catch {
       setBooks([]);
@@ -52,14 +53,28 @@ export default function FavoritePage() {
   }, [fetchFavorites]);
 
   const handleFavoriteToggle = async (bookId: number) => {
-    // Optimistically remove from the list (unfavoriting is the only action here)
-    setBooks((prev) => prev.filter((b) => b.id !== bookId));
-    try {
-      await api.post(`/favorites/${bookId}`);
-    } catch {
-      // Revert on failure
-      fetchFavorites();
-    }
+    // 1. Mark as removing — triggers fade-out transition
+    setRemovingIds((prev) => new Set(prev).add(bookId));
+
+    // 2. Fire API immediately (don't await UI)
+    api.post(`/favorites/${bookId}`).catch(() => {
+      // On failure: snap it back
+      setRemovingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(bookId);
+        return next;
+      });
+    });
+
+    // 3. After animation completes, actually remove from list
+    setTimeout(() => {
+      setBooks((prev) => prev.filter((b) => b.id !== bookId));
+      setRemovingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(bookId);
+        return next;
+      });
+    }, REMOVE_ANIMATION_MS);
   };
 
   if (!user && !authLoading) return null;
@@ -74,7 +89,9 @@ export default function FavoritePage() {
         <h1 className="font-serif text-4xl text-[#1a1714]">Favorites</h1>
         {!isLoading && (
           <p className="text-sm text-[#8a7968] font-light mt-2">
-            {books.length} {books.length === 1 ? "book" : "books"} saved
+            {/* Show count excluding ones currently being removed */}
+            {books.length - removingIds.size}{" "}
+            {books.length - removingIds.size === 1 ? "book" : "books"} saved
           </p>
         )}
       </div>
@@ -82,7 +99,7 @@ export default function FavoritePage() {
       {/* Grid */}
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
         </div>
@@ -106,13 +123,24 @@ export default function FavoritePage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-          {books.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              onFavoriteToggle={handleFavoriteToggle}
-            />
-          ))}
+          {books.map((book) => {
+            const isRemoving = removingIds.has(book.id);
+            return (
+              <div
+                key={book.id}
+                style={{
+                  transition: `opacity ${REMOVE_ANIMATION_MS}ms ease, transform ${REMOVE_ANIMATION_MS}ms ease`,
+                  opacity: isRemoving ? 0 : 1,
+                  transform: isRemoving
+                    ? "scale(0.93) translateY(6px)"
+                    : "scale(1) translateY(0px)",
+                  pointerEvents: isRemoving ? "none" : "auto",
+                }}
+              >
+                <BookCard book={book} onFavoriteToggle={handleFavoriteToggle} />
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

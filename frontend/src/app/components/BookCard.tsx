@@ -3,6 +3,7 @@
 import { Heart, Edit2, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export interface Book {
   id: number;
@@ -29,6 +30,18 @@ const coverPalettes = [
   { bg: "#251f2e", accent: "#c4a8d4" },
   { bg: "#2a2218", accent: "#e8c87a" },
   { bg: "#1e2428", accent: "#8ab4d4" },
+];
+
+// Each burst particle: angle (deg) + distance (px) + slight size variation
+const BURST_PARTICLES = [
+  { angle: 0, dist: 28, size: 7 },
+  { angle: 45, dist: 32, size: 5 },
+  { angle: 90, dist: 26, size: 8 },
+  { angle: 135, dist: 30, size: 5 },
+  { angle: 180, dist: 28, size: 7 },
+  { angle: 225, dist: 32, size: 5 },
+  { angle: 270, dist: 26, size: 6 },
+  { angle: 315, dist: 30, size: 5 },
 ];
 
 function PlaceholderCover({
@@ -78,6 +91,50 @@ export default function BookCard({
 }: BookCardProps) {
   const { user, isAdmin } = useAuth();
   const router = useRouter();
+  const [isBursting, setIsBursting] = useState(false);
+  const [isPopping, setIsPopping] = useState(false);
+
+  // Inject keyframes once into the document head
+  useEffect(() => {
+    const styleId = "book-card-heart-keyframes";
+    if (document.getElementById(styleId)) return;
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.textContent = `
+      @keyframes heartPop {
+        0%   { transform: scale(1); }
+        30%  { transform: scale(1.7); }
+        55%  { transform: scale(0.85); }
+        75%  { transform: scale(1.25); }
+        100% { transform: scale(1); }
+      }
+      @keyframes heartBurst {
+        0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        60%  { opacity: 0.8; }
+        100% { transform: translate(
+                  calc(-50% + var(--tx)),
+                  calc(-50% + var(--ty))
+               ) scale(0.3);
+               opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }, []);
+
+  function handleFavoriteClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    onFavoriteToggle?.(book.id);
+
+    // Trigger pop
+    setIsPopping(true);
+    setTimeout(() => setIsPopping(false), 450);
+
+    // Only burst when adding to favorites, not removing
+    if (!book.is_favorited) {
+      setIsBursting(true);
+      setTimeout(() => setIsBursting(false), 600);
+    }
+  }
 
   return (
     <div className="group relative flex flex-col bg-[#f5f0e8] border border-[#d4b896]/20 hover:border-[#d4b896]/60 transition-all duration-300 hover:-translate-y-1">
@@ -103,27 +160,71 @@ export default function BookCard({
           </span>
         </div>
 
-        {/* Favorite button */}
+        {/* Favorite button + burst container */}
         {user && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onFavoriteToggle?.(book.id);
-            }}
-            className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center bg-[#1a1714]/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#1a1714]"
-            aria-label={
-              book.is_favorited ? "Remove from favorites" : "Add to favorites"
-            }
-          >
-            <Heart
-              size={14}
-              className={
-                book.is_favorited
-                  ? "fill-[#d4b896] text-[#d4b896]"
-                  : "text-[#f5f0e8]"
+          <div className="absolute top-3 right-3 w-6 h-6">
+            {/* Burst particles */}
+            {isBursting &&
+              BURST_PARTICLES.map((p, i) => {
+                const rad = (p.angle * Math.PI) / 180;
+                const tx = Math.cos(rad) * p.dist;
+                const ty = Math.sin(rad) * p.dist;
+                return (
+                  <span
+                    key={i}
+                    aria-hidden
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      width: p.size,
+                      height: p.size,
+                      pointerEvents: "none",
+                      // pass CSS vars for the animation endpoint
+                      ["--tx" as string]: `${tx}px`,
+                      ["--ty" as string]: `${ty}px`,
+                      animation: "heartBurst 0.55s ease-out forwards",
+                      animationDelay: `${i * 18}ms`,
+                    }}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width={p.size}
+                      height={p.size}
+                      style={{ display: "block" }}
+                    >
+                      <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        fill="#d4b896"
+                      />
+                    </svg>
+                  </span>
+                );
+              })}
+
+            {/* Main favorite button */}
+            <button
+              onClick={handleFavoriteClick}
+              className="w-6 h-6 rounded-full flex items-center justify-center bg-[#1a1714]/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#1a1714]"
+              style={{
+                animation: isPopping
+                  ? "heartPop 0.45s cubic-bezier(.36,.07,.19,.97) forwards"
+                  : "none",
+              }}
+              aria-label={
+                book.is_favorited ? "Remove from favorites" : "Add to favorites"
               }
-            />
-          </button>
+            >
+              <Heart
+                size={14}
+                className={
+                  book.is_favorited
+                    ? "fill-[#d4b896] text-[#d4b896]"
+                    : "text-[#f5f0e8]"
+                }
+              />
+            </button>
+          </div>
         )}
       </div>
 

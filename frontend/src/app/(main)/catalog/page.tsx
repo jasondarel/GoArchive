@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen, SlidersHorizontal, X, Check } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import BookCard, { Book } from "../../components/BookCard";
 import BookFormModal from "../../components/BookFormModal";
 import api from "@/lib/axios";
@@ -44,6 +45,7 @@ function SkeletonCard() {
 }
 
 export default function CatalogPage() {
+  const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
@@ -141,19 +143,31 @@ export default function CatalogPage() {
   };
 
   const fetchBooks = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await api.get("/books", {
+  setIsLoading(true);
+  setError(null);
+  try {
+    const [booksRes, favoritedIds] = await Promise.all([
+      api.get("/books", {
         params: searchQuery ? { search: searchQuery } : {},
-      });
-      setBooks(res.data.data ?? res.data);
+      }),
+      user
+        ? api.get("/favorites")
+            .then((res) => {
+              const data: Book[] = res.data.data ?? res.data;
+              return new Set(data.map((b) => b.id));
+            })
+            .catch(() => new Set<number>())
+        : Promise.resolve(new Set<number>()),
+    ]);
+
+      const raw: Book[] = booksRes.data.data ?? booksRes.data;
+      setBooks(raw.map((b) => ({ ...b, is_favorited: favoritedIds.has(b.id) })));
     } catch {
       setError("Failed to load books. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, user]);
 
   useEffect(() => {
     fetchBooks();
@@ -404,7 +418,7 @@ export default function CatalogPage() {
       {/* Grid */}
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-          {Array.from({ length: 10 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
         </div>
