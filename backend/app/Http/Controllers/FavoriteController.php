@@ -10,7 +10,9 @@ class FavoriteController extends Controller
 {
     public function index(Request $request)
     {
-        $query = clone $request->user()->favorites()->with('book');
+        $query = clone $request->user()->favorites()->with(['book' => function ($q) {
+            $q->with(['user:id,name', 'genre:id,name'])->withCount('favorites');
+        }]);
 
         // Apply filters through relationship
         if ($request->filled('search') || $request->filled('genre') || $request->filled('year_min') || $request->filled('year_max') || $request->filled('rating_min')) {

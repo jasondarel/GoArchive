@@ -8,8 +8,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useSearch } from "@/context/SearchContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/axios";
+import BookFormModal from "../../components/BookFormModal";
+import ConfirmModal from "../../components/ConfirmModal";
+import { AnimatePresence } from "framer-motion";
 
-const REMOVE_ANIMATION_MS = 500; // must match CSS transition duration below
+const REMOVE_ANIMATION_MS = 500;
 
 function SkeletonCard() {
   return (
@@ -32,6 +35,10 @@ export default function FavoritePage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [removingIds, setRemovingIds] = useState<Set<number>>(new Set());
+
+  const [editBook, setEditBook] = useState<Book | null>(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -66,13 +73,31 @@ export default function FavoritePage() {
     fetchFavorites();
   }, [fetchFavorites]);
 
+  const handleDelete = (bookId: number) => {
+    setBookToDelete(bookId);
+  };
+
+  const confirmDelete = async () => {
+    if (!bookToDelete) return;
+    const bookId = bookToDelete;
+    setBooks((prev) => prev.filter((b) => b.id !== bookId));
+    setBookToDelete(null);
+    try {
+      await api.delete(`/books/${bookId}`);
+    } catch {
+      fetchFavorites();
+    }
+  };
+
+  const handleEdit = (book: Book) => {
+    setEditBook(book);
+    setShowEdit(true);
+  };
+
   const handleFavoriteToggle = async (bookId: number) => {
-    // 1. Mark as removing — triggers fade-out transition
     setRemovingIds((prev) => new Set(prev).add(bookId));
 
-    // 2. Fire API immediately (don't await UI)
     api.post(`/favorites/${bookId}`).catch(() => {
-      // On failure: snap it back
       setRemovingIds((prev) => {
         const next = new Set(prev);
         next.delete(bookId);
@@ -80,7 +105,6 @@ export default function FavoritePage() {
       });
     });
 
-    // 3. After animation completes, actually remove from list
     setTimeout(() => {
       setBooks((prev) => prev.filter((b) => b.id !== bookId));
       setRemovingIds((prev) => {
@@ -165,12 +189,45 @@ export default function FavoritePage() {
                   pointerEvents: isRemoving ? "none" : "auto",
                 }}
               >
-                <BookCard book={book} onFavoriteToggle={handleFavoriteToggle} />
+                <BookCard
+                  book={book}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
               </div>
             );
           })}
         </div>
       )}
+
+      <AnimatePresence>
+        {showEdit && editBook && (
+          <BookFormModal
+            key="edit-modal"
+            editBook={editBook}
+            onClose={() => {
+              setShowEdit(false);
+              setEditBook(null);
+            }}
+            onSuccess={() => {
+              setShowEdit(false);
+              setEditBook(null);
+              fetchFavorites();
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={bookToDelete !== null}
+        onClose={() => setBookToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Delete Book"
+        message="Are you sure you want to delete this book? This action cannot be undone."
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </div>
   );
 }
