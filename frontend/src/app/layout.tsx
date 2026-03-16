@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({ subsets: ["latin"] });
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+});
 
 export const metadata: Metadata = {
   title: "GoArchive",
@@ -18,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body className={geist.className}>
+      <body className={`${playfair.variable} ${dmSans.variable}`}>
         <AuthProvider>
           {children}
           <Toaster position="top-right" />
