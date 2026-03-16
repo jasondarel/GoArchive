@@ -111,7 +111,7 @@ class DatabaseSeeder extends Seeder
                 'rating'      => 4.5,
             ],
             [
-                'title'       => 'The Subtle Art of Not Giving a F*ck',
+                'title'       => 'The Subtle Art of Not Giving a Fish',
                 'description' => 'Pendekatan jujur dari Mark Manson tentang cara mencapai kehidupan yang lebih baik tanpa memedulikan hal-hal yang tidak penting.',
                 'image_path'  => null,
                 'genre_id'    => $selfHelp,

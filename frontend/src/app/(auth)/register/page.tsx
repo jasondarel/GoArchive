@@ -136,7 +136,7 @@ export default function RegisterPage() {
             },
           ].map((step) => (
             <div key={step.n} className="flex gap-4 mb-6">
-              <div className="w-8 h-8 rounded-full border border-[#d4b896] flex items-center justify-center text-[0.65rem] text-[#d4b896] font-medium flex-shrink-0">
+              <div className="w-8 h-8 rounded-full border border-[#d4b896] flex items-center justify-center text-[0.65rem] text-[#d4b896] font-medium shrink-0">
                 {step.n}
               </div>
               <div className="pt-1">
@@ -266,7 +266,7 @@ export default function RegisterPage() {
                         }`}
                       >
                         <div
-                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
                             passed
                               ? "border-[#7a9e7e] bg-[#7a9e7e]"
                               : "border-[#c4a882]/40"

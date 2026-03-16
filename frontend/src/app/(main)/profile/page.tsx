@@ -43,7 +43,7 @@ export default function ProfilPage() {
 
       {/* Avatar + name card */}
       <div className="bg-[#1a1714] p-8 flex items-center gap-6 mb-1">
-        <div className="w-16 h-16 rounded-full bg-[#d4b896]/20 border border-[#d4b896]/40 flex items-center justify-center flex-shrink-0">
+        <div className="w-16 h-16 rounded-full bg-[#d4b896]/20 border border-[#d4b896]/40 flex items-center justify-center shrink-0">
           <span className="font-serif text-2xl text-[#d4b896]">{initials}</span>
         </div>
         <div>
@@ -66,7 +66,7 @@ export default function ProfilPage() {
       {/* Details */}
       <div className="bg-[#ede8de] border border-[#d4b896]/20 divide-y divide-[#d4b896]/20 mb-6">
         <div className="flex items-center gap-4 px-6 py-4">
-          <User size={15} className="text-[#c4a882] flex-shrink-0" />
+          <User size={15} className="text-[#c4a882] shrink-0" />
           <div>
             <p className="text-[0.6rem] tracking-[0.12em] uppercase text-[#c4a882] mb-0.5">
               Full Name
@@ -76,7 +76,7 @@ export default function ProfilPage() {
         </div>
 
         <div className="flex items-center gap-4 px-6 py-4">
-          <Mail size={15} className="text-[#c4a882] flex-shrink-0" />
+          <Mail size={15} className="text-[#c4a882] shrink-0" />
           <div>
             <p className="text-[0.6rem] tracking-[0.12em] uppercase text-[#c4a882] mb-0.5">
               Email Address
@@ -86,7 +86,7 @@ export default function ProfilPage() {
         </div>
 
         <div className="flex items-center gap-4 px-6 py-4">
-          <Shield size={15} className="text-[#c4a882] flex-shrink-0" />
+          <Shield size={15} className="text-[#c4a882] shrink-0" />
           <div>
             <p className="text-[0.6rem] tracking-[0.12em] uppercase text-[#c4a882] mb-0.5">
               Role

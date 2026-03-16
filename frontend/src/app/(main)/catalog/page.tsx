@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -16,7 +16,7 @@ import { AnimatePresence } from "framer-motion";
 function SkeletonCard() {
   return (
     <div className="flex flex-col bg-[#ede8de] border border-[#d4b896]/10 animate-pulse">
-      <div className="aspect-[2/3] bg-[#d4b896]/20" />
+      <div className="aspect-2/3 bg-[#d4b896]/20" />
       <div className="p-4 space-y-2">
         <div className="h-3 bg-[#d4b896]/20 rounded w-3/4" />
         <div className="h-2 bg-[#d4b896]/20 rounded w-full" />
@@ -26,7 +26,23 @@ function SkeletonCard() {
   );
 }
 
-export default function CatalogPage() {
+export default function CatalogPageWrapper() {
+  return (
+    <Suspense
+      fallback={
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      }
+    >
+      <CatalogPage />
+    </Suspense>
+  );
+}
+
+function CatalogPage() {
   const { user } = useAuth();
   const { searchQuery } = useSearch();
   const router = useRouter();

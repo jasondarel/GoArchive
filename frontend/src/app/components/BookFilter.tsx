@@ -135,7 +135,7 @@ export default function BookFilter() {
     <div ref={filterRef} className="relative">
       <button
         onClick={() => setFilterOpen((o) => !o)}
-        className={`relative flex items-center gap-1.5 px-3 py-2 text-[0.7rem] tracking-[0.1em] uppercase font-medium transition-colors duration-200 border ${
+        className={`relative flex items-center gap-1.5 px-3 py-2 text-[0.7rem] tracking-widest uppercase font-medium transition-colors duration-200 border ${
           filterOpen || activeFilterCount > 0
             ? "bg-[#1a1714] text-[#f5f0e8] border-[#1a1714]"
             : "bg-transparent text-[#8a7968] border-[#d4b896]/50 hover:border-[#d4b896] hover:text-[#1a1714]"
@@ -242,9 +242,7 @@ export default function BookFilter() {
                       inputClass={inputClass}
                     />
                   </div>
-                  <span className="text-[#c4a882] text-sm flex-shrink-0">
-                    —
-                  </span>
+                  <span className="text-[#c4a882] text-sm shrink-0">—</span>
                   <div className="flex-1">
                     <StepperInput
                       value={draft.year_max}
@@ -299,13 +297,13 @@ export default function BookFilter() {
             <div className="flex border-t border-[#d4b896]/20">
               <button
                 onClick={clearFilters}
-                className="flex-1 py-3 text-[0.68rem] tracking-[0.1em] uppercase font-medium text-[#8a7968] hover:text-[#1a1714] transition-colors border-r border-[#d4b896]/20"
+                className="flex-1 py-3 text-[0.68rem] tracking-widest uppercase font-medium text-[#8a7968] hover:text-[#1a1714] transition-colors border-r border-[#d4b896]/20"
               >
                 Clear all
               </button>
               <button
                 onClick={applyFilters}
-                className="flex-1 py-3 text-[0.68rem] tracking-[0.1em] uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
+                className="flex-1 py-3 text-[0.68rem] tracking-widest uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
               >
                 Apply
               </button>

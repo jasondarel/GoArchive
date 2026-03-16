@@ -67,7 +67,9 @@ export default function ConfirmModal({
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#d4b896]/20 bg-[#f5f0e8]">
               <div className="flex items-center gap-2">
-                {isDestructive && <AlertTriangle size={18} className="text-[#c0735a]" />}
+                {isDestructive && (
+                  <AlertTriangle size={18} className="text-[#c0735a]" />
+                )}
                 <h2 className="font-serif text-lg text-[#1a1714]">{title}</h2>
               </div>
               <button
@@ -89,7 +91,7 @@ export default function ConfirmModal({
             <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#d4b896]/20 bg-[#ede8de]">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-[0.75rem] tracking-[0.1em] uppercase text-[#8a7968] hover:text-[#1a1714] transition-colors"
+                className="px-4 py-2 text-[0.75rem] tracking-widest uppercase text-[#8a7968] hover:text-[#1a1714] transition-colors"
               >
                 {cancelText}
               </button>
@@ -98,7 +100,7 @@ export default function ConfirmModal({
                   onConfirm();
                   onClose();
                 }}
-                className={`px-5 py-2 text-[0.75rem] tracking-[0.1em] uppercase text-[#f5f0e8] transition-colors ${
+                className={`px-5 py-2 text-[0.75rem] tracking-widest uppercase text-[#f5f0e8] transition-colors ${
                   isDestructive
                     ? "bg-[#c0735a] hover:bg-[#a65d45]"
                     : "bg-[#1a1714] hover:bg-[#2c2420]"

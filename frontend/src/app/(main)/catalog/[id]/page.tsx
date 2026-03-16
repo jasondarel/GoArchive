@@ -138,7 +138,7 @@ export default function BookDetailPage() {
       <div className="max-w-4xl mx-auto animate-pulse">
         <div className="h-4 bg-[#d4b896]/20 rounded w-24 mb-10" />
         <div className="flex gap-10">
-          <div className="w-64 aspect-[2/3] bg-[#d4b896]/20 flex-shrink-0" />
+          <div className="w-64 aspect-2/3 bg-[#d4b896]/20 shrink-0" />
           <div className="flex-1 space-y-4 pt-4">
             <div className="h-3 bg-[#d4b896]/20 rounded w-24" />
             <div className="h-8 bg-[#d4b896]/20 rounded w-3/4" />
@@ -176,7 +176,7 @@ export default function BookDetailPage() {
         {/* Back */}
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-[#8a7968] hover:text-[#1a1714] text-[0.72rem] tracking-[0.1em] uppercase font-medium transition-colors mb-10"
+          className="flex items-center gap-2 text-[#8a7968] hover:text-[#1a1714] text-[0.72rem] tracking-widest uppercase font-medium transition-colors mb-10"
         >
           <ArrowLeft size={14} />
           Back
@@ -184,8 +184,8 @@ export default function BookDetailPage() {
 
         <div className="flex flex-col sm:flex-row gap-10">
           {/* Cover */}
-          <div className="w-full sm:w-64 flex-shrink-0">
-            <div className="aspect-[2/3] overflow-hidden relative">
+          <div className="w-full sm:w-64 shrink-0">
+            <div className="aspect-2/3 overflow-hidden relative">
               {book.image_url ? (
                 <img
                   src={book.image_url}
@@ -203,7 +203,7 @@ export default function BookDetailPage() {
                 <button
                   onClick={handleFavoriteToggle}
                   disabled={favLoading}
-                  className={`w-full flex items-center justify-center gap-2 py-3 text-[0.72rem] tracking-[0.1em] uppercase font-medium transition-colors duration-300 border disabled:opacity-60 ${
+                  className={`w-full flex items-center justify-center gap-2 py-3 text-[0.72rem] tracking-widest uppercase font-medium transition-colors duration-300 border disabled:opacity-60 ${
                     book.is_favorited
                       ? "bg-[#1a1714] text-[#d4b896] border-[#1a1714]"
                       : "border-[#d4b896]/40 text-[#8a7968] hover:border-[#d4b896] hover:text-[#1a1714]"
@@ -227,13 +227,13 @@ export default function BookDetailPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowEdit(true)}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-[#d4b896]/40 text-[0.68rem] tracking-[0.1em] uppercase text-[#8a7968] hover:text-[#1a1714] hover:border-[#d4b896] transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-[#d4b896]/40 text-[0.68rem] tracking-widest uppercase text-[#8a7968] hover:text-[#1a1714] hover:border-[#d4b896] transition-colors"
                   >
                     <Edit2 size={11} /> Edit
                   </button>
                   <button
                     onClick={handleDeleteClick}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-[#c0735a]/30 text-[0.68rem] tracking-[0.1em] uppercase text-[#c0735a] hover:bg-[#c0735a] hover:text-[#f5f0e8] transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-[#c0735a]/30 text-[0.68rem] tracking-widest uppercase text-[#c0735a] hover:bg-[#c0735a] hover:text-[#f5f0e8] transition-colors"
                   >
                     <Trash2 size={11} /> Delete
                   </button>

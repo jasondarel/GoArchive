@@ -140,7 +140,7 @@ export default function BookCard({
   return (
     <div className="group relative flex flex-col bg-[#f5f0e8] border border-[#d4b896]/20 hover:border-[#d4b896]/60 transition-all duration-300 hover:-translate-y-1">
       {/* Cover */}
-      <div className="relative aspect-[2/3] overflow-hidden bg-[#2c2420]">
+      <div className="relative aspect-2/3 overflow-hidden bg-[#2c2420]">
         {book.image_url ? (
           <img
             src={book.image_url}
@@ -244,18 +244,19 @@ export default function BookCard({
         {/* Meta tags: genre, year, rating */}
         <div className="flex flex-wrap items-center gap-1.5 mt-2">
           {book.genre && (
-            <span className="text-[0.6rem] tracking-[0.1em] uppercase px-1.5 py-0.5 bg-[#d4b896]/20 text-[#8a7968] border border-[#d4b896]/30">
+            <span className="text-[0.6rem] tracking-widest uppercase px-1.5 py-0.5 bg-[#d4b896]/20 text-[#8a7968] border border-[#d4b896]/30">
               {book.genre.name}
             </span>
           )}
           {book.year && (
-            <span className="text-[0.6rem] tracking-[0.1em] text-[#c4a882]">
+            <span className="text-[0.6rem] tracking-widest text-[#c4a882]">
               {book.year}
             </span>
           )}
           {book.favorites_count !== undefined && book.favorites_count > 0 && (
             <span className="text-[0.6rem] text-[#c0735a] flex items-center gap-0.5 ml-1">
-              <Heart size={9} className="fill-[#c0735a]" /> {book.favorites_count}
+              <Heart size={9} className="fill-[#c0735a]" />{" "}
+              {book.favorites_count}
             </span>
           )}
           {book.rating != null && (
@@ -270,13 +271,13 @@ export default function BookCard({
           <div className="flex gap-2 mt-3 pt-3 border-t border-[#d4b896]/20">
             <button
               onClick={() => onEdit?.(book)}
-              className="flex items-center gap-1.5 text-[0.65rem] tracking-[0.1em] uppercase text-[#8a7968] hover:text-[#1a1714] transition-colors"
+              className="flex items-center gap-1.5 text-[0.65rem] tracking-widest uppercase text-[#8a7968] hover:text-[#1a1714] transition-colors"
             >
               <Edit2 size={11} /> Edit
             </button>
             <button
               onClick={() => onDelete?.(book.id)}
-              className="flex items-center gap-1.5 text-[0.65rem] tracking-[0.1em] uppercase text-[#c0735a] hover:text-[#a0532a] transition-colors ml-auto"
+              className="flex items-center gap-1.5 text-[0.65rem] tracking-widest uppercase text-[#c0735a] hover:text-[#a0532a] transition-colors ml-auto"
             >
               <Trash2 size={11} /> Delete
             </button>

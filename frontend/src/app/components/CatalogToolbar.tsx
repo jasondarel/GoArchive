@@ -68,21 +68,21 @@ export default function CatalogToolbar() {
   };
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="relative flex items-center gap-2 flex-1 md:flex-initial min-w-0">
       {/* Search input */}
-      <div className="hidden sm:flex items-center gap-2 bg-[#ede8de] px-3 py-2 w-52">
-        <Search size={13} className="text-[#c4a882] flex-shrink-0" />
+      <div className="flex items-center gap-2 bg-[#ede8de] px-3 h-8 w-full md:w-52">
+        <Search size={13} className="text-[#c4a882] shrink-0" />
         <input
           type="text"
           placeholder="Search books..."
           value={searchQuery}
           onChange={handleSearch}
-          className="bg-transparent text-[0.8rem] text-[#1a1714] placeholder-[#c4a882] focus:outline-none w-full"
+          className="bg-transparent text-[0.8rem] text-[#1a1714] placeholder-[#c4a882] focus:outline-none w-full min-w-0"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="text-[#c4a882] hover:text-[#1a1714] transition-colors flex-shrink-0"
+            className="text-[#c4a882] hover:text-[#1a1714] transition-colors shrink-0"
           >
             <X size={11} />
           </button>
@@ -90,11 +90,11 @@ export default function CatalogToolbar() {
       </div>
 
       {/* Sort button */}
-      <div ref={sortRef} className="relative">
+      <div ref={sortRef} className="relative shrink-0">
         <button
           onClick={() => setSortOpen((o) => !o)}
           title="Sort"
-          className={`flex items-center justify-center w-9 h-9 border transition-colors duration-200 ${
+          className={`flex items-center justify-center w-8 h-8 border transition-colors duration-200 ${
             sortOpen || activeSort
               ? "bg-[#1a1714] text-[#f5f0e8] border-[#1a1714]"
               : "bg-transparent text-[#8a7968] border-[#d4b896]/50 hover:border-[#d4b896] hover:text-[#1a1714]"

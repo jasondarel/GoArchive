@@ -216,10 +216,10 @@ export default function BookFormModal({
           {/* Two-column: cover left, fields right */}
           <div className="flex gap-5 items-start">
             {/* Cover */}
-            <div className="flex-shrink-0 w-28">
+            <div className="shrink-0 w-28">
               <label className={labelClass}>Cover</label>
               <div
-                className="relative aspect-[2/3] border border-dashed border-[#d4b896]/50 hover:border-[#d4b896] transition-colors cursor-pointer overflow-hidden bg-[#ede8de]"
+                className="relative aspect-2/3 border border-dashed border-[#d4b896]/50 hover:border-[#d4b896] transition-colors cursor-pointer overflow-hidden bg-[#ede8de]"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {imagePreview ? (
@@ -230,7 +230,7 @@ export default function BookFormModal({
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-[#1a1714]/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <span className="text-[0.6rem] tracking-[0.1em] uppercase text-[#f5f0e8] text-center px-1">
+                      <span className="text-[0.6rem] tracking-widest uppercase text-[#f5f0e8] text-center px-1">
                         Change
                       </span>
                     </div>
@@ -370,14 +370,14 @@ export default function BookFormModal({
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="flex-1 py-3 text-[0.72rem] tracking-[0.1em] uppercase font-medium text-[#8a7968] border border-[#d4b896]/40 hover:border-[#d4b896] transition-colors disabled:opacity-50"
+              className="flex-1 py-3 text-[0.72rem] tracking-widest uppercase font-medium text-[#8a7968] border border-[#d4b896]/40 hover:border-[#d4b896] transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 py-3 text-[0.72rem] tracking-[0.1em] uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 py-3 text-[0.72rem] tracking-widest uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>

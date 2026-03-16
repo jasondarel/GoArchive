@@ -9,13 +9,12 @@ import { useSearch } from "@/context/SearchContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/axios";
 
-
 const REMOVE_ANIMATION_MS = 500; // must match CSS transition duration below
 
 function SkeletonCard() {
   return (
     <div className="flex flex-col bg-[#ede8de] border border-[#d4b896]/10 animate-pulse">
-      <div className="aspect-[2/3] bg-[#d4b896]/20" />
+      <div className="aspect-2/3 bg-[#d4b896]/20" />
       <div className="p-4 space-y-2">
         <div className="h-3 bg-[#d4b896]/20 rounded w-3/4" />
         <div className="h-2 bg-[#d4b896]/20 rounded w-full" />
@@ -47,9 +46,12 @@ export default function FavoritePage() {
       const params: Record<string, string> = {};
       if (searchParams.get("sort")) params.sort = searchParams.get("sort")!;
       if (searchParams.get("genre")) params.genre = searchParams.get("genre")!;
-      if (searchParams.get("year_min")) params.year_min = searchParams.get("year_min")!;
-      if (searchParams.get("year_max")) params.year_max = searchParams.get("year_max")!;
-      if (searchParams.get("rating_min")) params.rating_min = searchParams.get("rating_min")!;
+      if (searchParams.get("year_min"))
+        params.year_min = searchParams.get("year_min")!;
+      if (searchParams.get("year_max"))
+        params.year_max = searchParams.get("year_max")!;
+      if (searchParams.get("rating_min"))
+        params.rating_min = searchParams.get("rating_min")!;
 
       const res = await api.get("/favorites", { params });
       setBooks(res.data.data ?? res.data);
@@ -92,7 +94,7 @@ export default function FavoritePage() {
   if (!user && !authLoading) return null;
 
   const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase())
+    book.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
