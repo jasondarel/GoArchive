@@ -7,10 +7,10 @@ import { Eye, EyeOff, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const passwordRules = [
-  { label: "Minimal 8 karakter", test: (pw: string) => pw.length >= 8 },
-  { label: "Huruf besar (A-Z)", test: (pw: string) => /[A-Z]/.test(pw) },
-  { label: "Huruf kecil (a-z)", test: (pw: string) => /[a-z]/.test(pw) },
-  { label: "Angka (0-9)", test: (pw: string) => /[0-9]/.test(pw) },
+  { label: "8 characters minimum", test: (pw: string) => pw.length >= 8 },
+  { label: "Uppercase letters (A-Z)", test: (pw: string) => /[A-Z]/.test(pw) },
+  { label: "Lowercase letters (a-z)", test: (pw: string) => /[a-z]/.test(pw) },
+  { label: "Numbers (0-9)", test: (pw: string) => /[0-9]/.test(pw) },
 ];
 
 export default function RegisterPage() {
@@ -119,17 +119,33 @@ export default function RegisterPage() {
           </h2>
 
           {[
-            { n: "01", title: "Register Account", desc: "Create a free account in seconds." },
-            { n: "02", title: "Explore Catalog", desc: "Discover books from various genres." },
-            { n: "03", title: "Save Favorites", desc: "Mark books you want to read." },
+            {
+              n: "01",
+              title: "Register Account",
+              desc: "Create a free account in seconds.",
+            },
+            {
+              n: "02",
+              title: "Explore Catalog",
+              desc: "Discover books from various genres.",
+            },
+            {
+              n: "03",
+              title: "Save Favorites",
+              desc: "Mark books you want to read.",
+            },
           ].map((step) => (
             <div key={step.n} className="flex gap-4 mb-6">
               <div className="w-8 h-8 rounded-full border border-[#d4b896] flex items-center justify-center text-[0.65rem] text-[#d4b896] font-medium flex-shrink-0">
                 {step.n}
               </div>
               <div className="pt-1">
-                <p className="text-[#f5f0e8] text-sm font-medium mb-0.5">{step.title}</p>
-                <p className="text-[#666] text-[0.78rem] font-light leading-relaxed">{step.desc}</p>
+                <p className="text-[#f5f0e8] text-sm font-medium mb-0.5">
+                  {step.title}
+                </p>
+                <p className="text-[#666] text-[0.78rem] font-light leading-relaxed">
+                  {step.desc}
+                </p>
               </div>
             </div>
           ))}
@@ -184,7 +200,9 @@ export default function RegisterPage() {
                 className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors disabled:opacity-50"
               />
               {fieldErrors.name && (
-                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.name}</p>
+                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                  {fieldErrors.name}
+                </p>
               )}
             </div>
 
@@ -204,7 +222,9 @@ export default function RegisterPage() {
                 className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors disabled:opacity-50"
               />
               {fieldErrors.email && (
-                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.email}</p>
+                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                  {fieldErrors.email}
+                </p>
               )}
             </div>
 
@@ -252,7 +272,13 @@ export default function RegisterPage() {
                               : "border-[#c4a882]/40"
                           }`}
                         >
-                          {passed && <Check size={8} className="text-white" strokeWidth={3} />}
+                          {passed && (
+                            <Check
+                              size={8}
+                              className="text-white"
+                              strokeWidth={3}
+                            />
+                          )}
                         </div>
                         {rule.label}
                       </div>
@@ -261,7 +287,9 @@ export default function RegisterPage() {
                 </div>
               )}
               {fieldErrors.password && (
-                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.password}</p>
+                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                  {fieldErrors.password}
+                </p>
               )}
             </div>
 

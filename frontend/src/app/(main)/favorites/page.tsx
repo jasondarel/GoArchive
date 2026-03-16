@@ -67,7 +67,7 @@ export default function FavoritePage() {
   return (
     <div>
       {/* Page header */}
-      <div className="mb-10">
+      <div className="mb-6">
         <p className="text-[0.65rem] tracking-[0.2em] uppercase text-[#c4a882] mb-1">
           Your collection
         </p>
