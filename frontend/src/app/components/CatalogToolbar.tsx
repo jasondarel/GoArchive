@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Search, X, Check, ArrowUpDown } from "lucide-react";
 
 const SORT_OPTIONS = [
@@ -17,6 +17,7 @@ const SORT_OPTIONS = [
 export default function CatalogToolbar() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const [searchValue, setSearchValue] = useState(searchParams.get("q") || "");
   const [sortOpen, setSortOpen] = useState(false);
@@ -51,9 +52,9 @@ export default function CatalogToolbar() {
         if (v) params.set(k, v);
         else params.delete(k);
       });
-      router.replace(`/catalog?${params.toString()}`);
+      router.replace(`${pathname}?${params.toString()}`);
     },
-    [router, searchParams],
+    [router, pathname, searchParams],
   );
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -24,14 +24,14 @@ export default function Navbar({ onUploadClick }: NavbarProps) {
   return (
     <header className="sticky top-0 z-50 bg-[#f5f0e8] border-b border-[#d4b896]/30">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
-        {/* Logo */}
-        <Link href="/catalog" className="flex-shrink-0">
+        {/* Logo + Nav links */}
+      <div className="flex items-center gap-4 flex-shrink-0">
+        <Link href="/catalog">
           <span className="font-serif text-xl text-[#1a1714] tracking-wider">
             Go<span className="text-[#d4b896]">·</span>Archive
           </span>
         </Link>
 
-        {/* Nav links */}
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map(({ href, label }) => {
             const active = pathname === href;
@@ -50,6 +50,7 @@ export default function Navbar({ onUploadClick }: NavbarProps) {
             );
           })}
         </nav>
+      </div>
 
         {/* Right side */}
         <div className="flex items-center gap-3">

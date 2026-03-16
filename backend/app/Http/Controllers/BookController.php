@@ -15,7 +15,40 @@ class BookController extends Controller
             $query->where('title', 'ilike', '%' . $request->search . '%');
         }
 
-        $books = $query->latest()->paginate(12);
+        if ($request->filled('genre')) {
+            $query->where('genre_id', $request->genre);
+        }
+
+        if ($request->filled('year_min')) {
+            $query->where('year', '>=', $request->year_min);
+        }
+
+        if ($request->filled('year_max')) {
+            $query->where('year', '<=', $request->year_max);
+        }
+
+        if ($request->filled('rating_min')) {
+            $query->where('rating', '>=', $request->rating_min);
+        }
+
+        $sort = $request->sort ?? 'newest';
+        if ($sort === 'title_asc') {
+            $query->orderBy('title', 'asc');
+        } elseif ($sort === 'title_desc') {
+            $query->orderBy('title', 'desc');
+        } elseif ($sort === 'year_asc') {
+            $query->orderBy('year', 'asc');
+        } elseif ($sort === 'year_desc') {
+            $query->orderBy('year', 'desc');
+        } elseif ($sort === 'rating_desc') {
+            $query->orderBy('rating', 'desc');
+        } elseif ($sort === 'rating_asc') {
+            $query->orderBy('rating', 'asc');
+        } else {
+            $query->latest();
+        }
+
+        $books = $query->paginate(12);
 
         // Append is_favorited flag for authenticated users
         if ($request->user()) {

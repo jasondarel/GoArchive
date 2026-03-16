@@ -3,9 +3,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { Heart } from "lucide-react";
 import BookCard, { Book } from "../../components/BookCard";
+import BookFilter from "../../components/BookFilter";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/axios";
+
 
 const REMOVE_ANIMATION_MS = 500; // must match CSS transition duration below
 
@@ -25,6 +27,7 @@ function SkeletonCard() {
 export default function FavoritePage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [removingIds, setRemovingIds] = useState<Set<number>>(new Set());
@@ -39,14 +42,22 @@ export default function FavoritePage() {
     if (!user) return;
     setIsLoading(true);
     try {
-      const res = await api.get("/favorites");
+      const params: Record<string, string> = {};
+      if (searchParams.get("q")) params.search = searchParams.get("q")!;
+      if (searchParams.get("sort")) params.sort = searchParams.get("sort")!;
+      if (searchParams.get("genre")) params.genre = searchParams.get("genre")!;
+      if (searchParams.get("year_min")) params.year_min = searchParams.get("year_min")!;
+      if (searchParams.get("year_max")) params.year_max = searchParams.get("year_max")!;
+      if (searchParams.get("rating_min")) params.rating_min = searchParams.get("rating_min")!;
+
+      const res = await api.get("/favorites", { params });
       setBooks(res.data.data ?? res.data);
     } catch {
       setBooks([]);
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, searchParams]);
 
   useEffect(() => {
     fetchFavorites();
@@ -86,7 +97,13 @@ export default function FavoritePage() {
         <p className="text-[0.65rem] tracking-[0.2em] uppercase text-[#c4a882] mb-1">
           Your collection
         </p>
-        <h1 className="font-serif text-4xl text-[#1a1714]">Favorites</h1>
+
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="font-serif text-4xl text-[#1a1714]">Favorites</h1>
+
+          <BookFilter />
+        </div>
+
         {!isLoading && (
           <p className="text-sm text-[#8a7968] font-light mt-2">
             {/* Show count excluding ones currently being removed */}
