@@ -78,6 +78,46 @@ class DatabaseSeeder extends Seeder
                 'year'        => 1999,
                 'rating'      => 4.6,
             ],
+            [
+                'title'       => 'Sapiens: A Brief History of Humankind',
+                'description' => 'Karya Yuval Noah Harari yang mengeksplorasi sejarah umat manusia dari zaman prasejarah hingga era modern.',
+                'image_path'  => null,
+                'genre_id'    => $nonFiction,
+                'year'        => 2011,
+                'rating'      => 4.8,
+            ],
+            [
+                'title'       => 'Harry Potter and the Sorcerer\'s Stone',
+                'description' => 'Kisah awal perjalanan Harry Potter di dunia sihir Hogwarts karya J.K. Rowling.',
+                'image_path'  => null,
+                'genre_id'    => $fiction,
+                'year'        => 1997,
+                'rating'      => 4.9,
+            ],
+            [
+                'title'       => 'Thinking, Fast and Slow',
+                'description' => 'Daniel Kahneman mengungkap dua sistem yang membimbing cara kita berpikir, cepat dan intuitif vs lambat dan rasional.',
+                'image_path'  => null,
+                'genre_id'    => $nonFiction,
+                'year'        => 2011,
+                'rating'      => 4.7,
+            ],
+            [
+                'title'       => 'Design Patterns: Elements of Reusable Object-Oriented Software',
+                'description' => 'Buku legendaris oleh Gang of Four (GoF) tentang pola desain perangkat lunak.',
+                'image_path'  => null,
+                'genre_id'    => $tech,
+                'year'        => 1994,
+                'rating'      => 4.5,
+            ],
+            [
+                'title'       => 'The Subtle Art of Not Giving a F*ck',
+                'description' => 'Pendekatan jujur dari Mark Manson tentang cara mencapai kehidupan yang lebih baik tanpa memedulikan hal-hal yang tidak penting.',
+                'image_path'  => null,
+                'genre_id'    => $selfHelp,
+                'year'        => 2016,
+                'rating'      => 4.6,
+            ],
         ];
 
         foreach ($books as $book) {

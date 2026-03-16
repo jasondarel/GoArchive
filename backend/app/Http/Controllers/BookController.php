@@ -9,7 +9,7 @@ class BookController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Book::query()->with(['user:id,name', 'genre:id,name']);
+        $query = Book::query()->with(['user:id,name', 'genre:id,name'])->withCount('favorites');
 
         if ($request->filled('search')) {
             $query->where('title', 'ilike', '%' . $request->search . '%');
@@ -68,7 +68,7 @@ class BookController extends Controller
 
     public function show(Request $request, Book $book)
     {
-        $book->load(['user:id,name', 'genre:id,name']);
+        $book->load(['user:id,name', 'genre:id,name'])->loadCount('favorites');
 
         if ($request->user()) {
             $book->is_favorited = $request->user()

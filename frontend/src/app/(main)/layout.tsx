@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Navbar from "../components/Navbar";
 import BookFormModal from "../components/BookFormModal";
 import { SearchProvider } from "@/context/SearchContext";
+import { AnimatePresence } from "framer-motion";
 
 export default function MainLayout({
   children,
@@ -20,15 +21,18 @@ export default function MainLayout({
         </Suspense>
         <main className="max-w-7xl mx-auto px-6 py-10">{children}</main>
 
-        {showUploadModal && (
-          <BookFormModal
-            onClose={() => setShowUploadModal(false)}
-            onSuccess={() => {
-              setShowUploadModal(false);
-              window.dispatchEvent(new CustomEvent("book-added"));
-            }}
-          />
-        )}
+        <AnimatePresence>
+          {showUploadModal && (
+            <BookFormModal
+              key="upload-modal"
+              onClose={() => setShowUploadModal(false)}
+              onSuccess={() => {
+                setShowUploadModal(false);
+                window.dispatchEvent(new CustomEvent("book-added"));
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </SearchProvider>
   );

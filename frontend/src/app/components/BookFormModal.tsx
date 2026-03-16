@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, ImagePlus, Loader2, ChevronDown } from "lucide-react";
+import { X, ImagePlus, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Book } from "./BookCard";
 import api from "@/lib/axios";
+import { StepperInput } from "./StepperInput";
+import { SelectInput } from "./SelectInput";
 
 interface Genre {
   id: number;
@@ -40,9 +43,11 @@ export default function BookFormModal({
 
   const isEdit = !!editBook;
 
-  // Load genre list on mount
   useEffect(() => {
-    api.get("/genres").then((res) => setGenres(res.data)).catch(() => {});
+    api
+      .get("/genres")
+      .then((res) => setGenres(res.data))
+      .catch(() => {});
   }, []);
 
   const update =
@@ -61,6 +66,17 @@ export default function BookFormModal({
         });
       }
     };
+
+  const updateDirect = (key: keyof typeof form) => (val: string) => {
+    setForm((prev) => ({ ...prev, [key]: val }));
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const n = { ...prev };
+        delete n[key];
+        return n;
+      });
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -125,7 +141,6 @@ export default function BookFormModal({
     }
   };
 
-  // Close on ESC
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -139,8 +154,19 @@ export default function BookFormModal({
   const labelClass =
     "block text-[0.65rem] tracking-[0.15em] uppercase text-[#8a7968] font-medium mb-2";
 
+  const genreOptions = genres.map((g) => ({
+    value: g.id.toString(),
+    label: g.name,
+  }));
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-[#1a1714]/60 backdrop-blur-sm"
@@ -148,7 +174,18 @@ export default function BookFormModal({
       />
 
       {/* Modal */}
-      <div className="relative z-10 bg-[#f5f0e8] w-full max-w-lg border border-[#d4b896]/30 max-h-[90vh] overflow-y-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 25,
+          duration: 0.3,
+        }}
+        className="relative z-10 bg-[#f5f0e8] w-full max-w-lg border border-[#d4b896]/30 max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#d4b896]/20 sticky top-0 bg-[#f5f0e8] z-10">
           <div>
@@ -211,7 +248,9 @@ export default function BookFormModal({
                 JPG, PNG, WEBP · max 2MB
               </p>
               {fieldErrors.image && (
-                <p className="text-[0.72rem] text-[#c0735a] mt-1">{fieldErrors.image}</p>
+                <p className="text-[0.72rem] text-[#c0735a] mt-1">
+                  {fieldErrors.image}
+                </p>
               )}
               <input
                 ref={fileInputRef}
@@ -237,7 +276,9 @@ export default function BookFormModal({
                   className={inputClass}
                 />
                 {fieldErrors.title && (
-                  <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.title}</p>
+                  <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                    {fieldErrors.title}
+                  </p>
                 )}
               </div>
 
@@ -254,7 +295,9 @@ export default function BookFormModal({
                   className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors resize-none disabled:opacity-50"
                 />
                 {fieldErrors.description && (
-                  <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.description}</p>
+                  <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                    {fieldErrors.description}
+                  </p>
                 )}
               </div>
             </div>
@@ -263,29 +306,18 @@ export default function BookFormModal({
           {/* Genre */}
           <div>
             <label className={labelClass}>Genre</label>
-            <div className="relative">
-              <select
-                value={form.genre_id}
-                onChange={update("genre_id")}
-                disabled={isLoading}
-                className="w-full appearance-none bg-transparent border-b border-[#c4a882]/50 pb-2.5 pr-7 text-[0.9375rem] text-[#1a1714] focus:outline-none focus:border-[#1a1714] transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                <option value="" className="bg-[#f5f0e8] text-[#8a7968]">
-                  — Select a genre —
-                </option>
-                {genres.map((g) => (
-                  <option key={g.id} value={g.id} className="bg-[#f5f0e8] text-[#1a1714]">
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={14}
-                className="pointer-events-none absolute right-0 bottom-3 text-[#c4a882]"
-              />
-            </div>
+            <SelectInput
+              value={form.genre_id}
+              onChange={updateDirect("genre_id")}
+              options={genreOptions}
+              placeholder="— Select a genre —"
+              disabled={isLoading}
+              placement="top"
+            />
             {fieldErrors.genre_id && (
-              <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.genre_id}</p>
+              <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                {fieldErrors.genre_id}
+              </p>
             )}
           </div>
 
@@ -294,37 +326,40 @@ export default function BookFormModal({
             {/* Year */}
             <div className="flex-1">
               <label className={labelClass}>Year</label>
-              <input
-                type="number"
-                placeholder="e.g. 2024"
+              <StepperInput
                 value={form.year}
-                onChange={update("year")}
-                disabled={isLoading}
+                onChange={updateDirect("year")}
+                placeholder="e.g. 2024"
                 min={1000}
                 max={new Date().getFullYear() + 1}
-                className={inputClass}
+                step={1}
+                disabled={isLoading}
+                inputClass={inputClass}
               />
               {fieldErrors.year && (
-                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.year}</p>
+                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                  {fieldErrors.year}
+                </p>
               )}
             </div>
 
             {/* Rating */}
             <div className="flex-1">
               <label className={labelClass}>Rating / 5</label>
-              <input
-                type="number"
-                placeholder="e.g. 4.5"
+              <StepperInput
                 value={form.rating}
-                onChange={update("rating")}
-                disabled={isLoading}
+                onChange={updateDirect("rating")}
+                placeholder="e.g. 4.5"
                 min={0}
                 max={5}
                 step={0.1}
-                className={inputClass}
+                disabled={isLoading}
+                inputClass={inputClass}
               />
               {fieldErrors.rating && (
-                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.rating}</p>
+                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                  {fieldErrors.rating}
+                </p>
               )}
             </div>
           </div>
@@ -357,7 +392,7 @@ export default function BookFormModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

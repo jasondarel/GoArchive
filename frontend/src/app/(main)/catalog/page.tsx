@@ -7,9 +7,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useSearch } from "@/context/SearchContext";
 import BookCard, { Book } from "../../components/BookCard";
 import BookFormModal from "../../components/BookFormModal";
+import ConfirmModal from "../../components/ConfirmModal";
 import BookFilter from "../../components/BookFilter";
 import api from "@/lib/axios";
-
+import { AnimatePresence } from "framer-motion";
 
 // Skeleton card
 function SkeletonCard() {
@@ -36,6 +37,7 @@ export default function CatalogPage() {
   const [error, setError] = useState<string | null>(null);
   const [editBook, setEditBook] = useState<Book | null>(null);
   const [showEdit, setShowEdit] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<number | null>(null);
 
   const fetchBooks = useCallback(async () => {
     setIsLoading(true);
@@ -44,24 +46,30 @@ export default function CatalogPage() {
       const params: Record<string, string> = {};
       if (searchParams.get("sort")) params.sort = searchParams.get("sort")!;
       if (searchParams.get("genre")) params.genre = searchParams.get("genre")!;
-      if (searchParams.get("year_min")) params.year_min = searchParams.get("year_min")!;
-      if (searchParams.get("year_max")) params.year_max = searchParams.get("year_max")!;
-      if (searchParams.get("rating_min")) params.rating_min = searchParams.get("rating_min")!;
+      if (searchParams.get("year_min"))
+        params.year_min = searchParams.get("year_min")!;
+      if (searchParams.get("year_max"))
+        params.year_max = searchParams.get("year_max")!;
+      if (searchParams.get("rating_min"))
+        params.rating_min = searchParams.get("rating_min")!;
 
       const [booksRes, favoritedIds] = await Promise.all([
         api.get("/books", { params }),
-      user
-        ? api.get("/favorites")
-            .then((res) => {
-              const data: Book[] = res.data.data ?? res.data;
-              return new Set(data.map((b) => b.id));
-            })
-            .catch(() => new Set<number>())
-        : Promise.resolve(new Set<number>()),
-    ]);
+        user
+          ? api
+              .get("/favorites")
+              .then((res) => {
+                const data: Book[] = res.data.data ?? res.data;
+                return new Set(data.map((b) => b.id));
+              })
+              .catch(() => new Set<number>())
+          : Promise.resolve(new Set<number>()),
+      ]);
 
       const raw: Book[] = booksRes.data.data ?? booksRes.data;
-      setBooks(raw.map((b) => ({ ...b, is_favorited: favoritedIds.has(b.id) })));
+      setBooks(
+        raw.map((b) => ({ ...b, is_favorited: favoritedIds.has(b.id) })),
+      );
     } catch {
       setError("Failed to load books. Please try again.");
     } finally {
@@ -96,8 +104,13 @@ export default function CatalogPage() {
     }
   };
 
-  const handleDelete = async (bookId: number) => {
-    if (!confirm("Are you sure you want to delete this book?")) return;
+  const handleDelete = (bookId: number) => {
+    setBookToDelete(bookId);
+  };
+
+  const confirmDelete = async () => {
+    if (!bookToDelete) return;
+    const bookId = bookToDelete;
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
     try {
       await api.delete(`/books/${bookId}`);
@@ -112,7 +125,7 @@ export default function CatalogPage() {
   };
 
   const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase())
+    book.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -133,7 +146,8 @@ export default function CatalogPage() {
           <p className="text-sm text-[#8a7968] mt-2 font-light">
             Showing results for{" "}
             <span className="text-[#1a1714] font-medium">"{searchQuery}"</span>{" "}
-            — {filteredBooks.length} {filteredBooks.length === 1 ? "book" : "books"} found
+            — {filteredBooks.length}{" "}
+            {filteredBooks.length === 1 ? "book" : "books"} found
           </p>
         )}
       </div>
@@ -189,20 +203,33 @@ export default function CatalogPage() {
         </div>
       )}
 
-      {showEdit && editBook && (
-        <BookFormModal
-          editBook={editBook}
-          onClose={() => {
-            setShowEdit(false);
-            setEditBook(null);
-          }}
-          onSuccess={() => {
-            setShowEdit(false);
-            setEditBook(null);
-            fetchBooks();
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {showEdit && editBook && (
+          <BookFormModal
+            key="edit-modal"
+            editBook={editBook}
+            onClose={() => {
+              setShowEdit(false);
+              setEditBook(null);
+            }}
+            onSuccess={() => {
+              setShowEdit(false);
+              setEditBook(null);
+              fetchBooks();
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={bookToDelete !== null}
+        onClose={() => setBookToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Delete Book"
+        message="Are you sure you want to delete this book? This action cannot be undone."
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </>
   );
 }

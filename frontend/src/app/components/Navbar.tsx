@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Upload, BookOpen, Heart, User, LogIn } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Suspense } from "react";
+import { motion } from "framer-motion";
 import CatalogToolbar from "./CatalogToolbar";
 
 interface NavbarProps {
@@ -39,13 +40,21 @@ export default function Navbar({ onUploadClick }: NavbarProps) {
               <Link
                 key={href}
                 href={href}
-                className={`px-4 py-1.5 text-[0.72rem] tracking-[0.1em] uppercase font-medium transition-colors ${
+                className={`relative px-4 py-1.5 text-[0.72rem] tracking-[0.1em] uppercase font-medium transition-colors ${
                   active
-                    ? "text-[#1a1714] border-b-2 border-[#d4b896]"
+                    ? "text-[#1a1714]"
                     : "text-[#8a7968] hover:text-[#1a1714]"
                 }`}
               >
                 {label}
+                {active && (
+                  <motion.div
+                    layoutId="navbar-underline"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#d4b896]"
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
               </Link>
             );
           })}

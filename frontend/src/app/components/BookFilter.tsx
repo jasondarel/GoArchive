@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { SlidersHorizontal, X, Check } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import api from "@/lib/axios";
+import { StepperInput } from "./StepperInput";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Injected once — custom scrollbar for the genre list
 const GENRE_SCROLL_CLASS = "favorite-genre-scroll";
@@ -148,163 +150,169 @@ export default function BookFilter() {
         )}
       </button>
 
-      {filterOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-[#f5f0e8] border border-[#d4b896]/50 shadow-[0_12px_40px_rgba(26,23,20,0.15)] z-50">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#d4b896]/20">
-            <p className="text-[0.65rem] tracking-[0.15em] uppercase font-medium text-[#1a1714]">
-              Filters
-            </p>
-            <button
-              onClick={() => setFilterOpen(false)}
-              className="text-[#c4a882] hover:text-[#1a1714] transition-colors"
-            >
-              <X size={13} />
-            </button>
-          </div>
-
-          <div className="p-4 space-y-2 text-left">
-            {/* Genre */}
-            <div>
-              <label className={labelClass}>Genre</label>
-              <div
-                className={`max-h-36 overflow-y-auto space-y-0.5 pr-1 ${GENRE_SCROLL_CLASS}`}
-                style={
-                  {
-                    scrollbarWidth: "thin",
-                    scrollbarColor: "#d4b896 transparent",
-                  } as React.CSSProperties
-                }
+      <AnimatePresence>
+        {filterOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute right-0 top-full mt-2 w-72 bg-[#f5f0e8] border border-[#d4b896]/50 shadow-[0_12px_40px_rgba(26,23,20,0.15)] z-50"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#d4b896]/20">
+              <p className="text-[0.65rem] tracking-[0.15em] uppercase font-medium text-[#1a1714]">
+                Filters
+              </p>
+              <button
+                onClick={() => setFilterOpen(false)}
+                className="text-[#c4a882] hover:text-[#1a1714] transition-colors"
               >
-                <button
-                  type="button"
-                  onClick={() => setDraft((d) => ({ ...d, genre: "" }))}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-[0.8rem] transition-colors ${
-                    draft.genre === ""
-                      ? "bg-[#1a1714] text-[#f5f0e8]"
-                      : "text-[#3d342c] hover:bg-[#ede8de]"
-                  }`}
+                <X size={13} />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-2 text-left">
+              {/* Genre */}
+              <div>
+                <label className={labelClass}>Genre</label>
+                <div
+                  className={`max-h-36 overflow-y-auto space-y-0.5 pr-1 ${GENRE_SCROLL_CLASS}`}
+                  style={
+                    {
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "#d4b896 transparent",
+                    } as React.CSSProperties
+                  }
                 >
-                  <span>All genres</span>
-                  {draft.genre === "" && (
-                    <Check size={11} className="text-[#c4a882]" />
-                  )}
-                </button>
-                {genres.map((g) => (
                   <button
-                    key={g.id}
                     type="button"
-                    onClick={() =>
-                      setDraft((d) => ({
-                        ...d,
-                        genre:
-                          d.genre === g.id.toString()
-                            ? ""
-                            : g.id.toString(),
-                      }))
-                    }
+                    onClick={() => setDraft((d) => ({ ...d, genre: "" }))}
                     className={`w-full flex items-center justify-between px-3 py-2 text-[0.8rem] transition-colors ${
-                      draft.genre === g.id.toString()
+                      draft.genre === ""
                         ? "bg-[#1a1714] text-[#f5f0e8]"
                         : "text-[#3d342c] hover:bg-[#ede8de]"
                     }`}
                   >
-                    <span>{g.name}</span>
-                    {draft.genre === g.id.toString() && (
+                    <span>All genres</span>
+                    {draft.genre === "" && (
                       <Check size={11} className="text-[#c4a882]" />
                     )}
                   </button>
-                ))}
+                  {genres.map((g) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() =>
+                        setDraft((d) => ({
+                          ...d,
+                          genre:
+                            d.genre === g.id.toString() ? "" : g.id.toString(),
+                        }))
+                      }
+                      className={`w-full flex items-center justify-between px-3 py-2 text-[0.8rem] transition-colors ${
+                        draft.genre === g.id.toString()
+                          ? "bg-[#1a1714] text-[#f5f0e8]"
+                          : "text-[#3d342c] hover:bg-[#ede8de]"
+                      }`}
+                    >
+                      <span>{g.name}</span>
+                      {draft.genre === g.id.toString() && (
+                        <Check size={11} className="text-[#c4a882]" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-[#d4b896]/20" />
+
+              {/* Year range */}
+              <div>
+                <label className={labelClass}>Year range</label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <StepperInput
+                      value={draft.year_min}
+                      onChange={(val) =>
+                        setDraft((d) => ({ ...d, year_min: val }))
+                      }
+                      placeholder="From"
+                      min={1000}
+                      max={new Date().getFullYear()}
+                      inputClass={inputClass}
+                    />
+                  </div>
+                  <span className="text-[#c4a882] text-sm flex-shrink-0">
+                    —
+                  </span>
+                  <div className="flex-1">
+                    <StepperInput
+                      value={draft.year_max}
+                      onChange={(val) =>
+                        setDraft((d) => ({ ...d, year_max: val }))
+                      }
+                      placeholder="To"
+                      min={1000}
+                      max={new Date().getFullYear()}
+                      inputClass={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-[#d4b896]/20" />
+
+              {/* Rating threshold */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className={labelClass + " mb-0"}>Min. rating</label>
+                  <span className="text-[0.72rem] text-[#8a7968]">
+                    {draft.rating_min
+                      ? `${draft.rating_min}★ and above`
+                      : "Any"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {["1", "2", "3", "4", "4.5"].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() =>
+                        setDraft((d) => ({
+                          ...d,
+                          rating_min: d.rating_min === val ? "" : val,
+                        }))
+                      }
+                      className={`flex-1 py-1.5 text-[0.72rem] font-medium border transition-colors ${
+                        draft.rating_min === val
+                          ? "bg-[#1a1714] text-[#f5f0e8] border-[#1a1714]"
+                          : "text-[#8a7968] border-[#d4b896]/40 hover:border-[#d4b896] hover:text-[#1a1714]"
+                      }`}
+                    >
+                      {val}★
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="border-t border-[#d4b896]/20" />
-
-            {/* Year range */}
-            <div>
-              <label className={labelClass}>Year range</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  placeholder="From"
-                  value={draft.year_min}
-                  min={1000}
-                  max={new Date().getFullYear()}
-                  onChange={(e) =>
-                    setDraft((d) => ({ ...d, year_min: e.target.value }))
-                  }
-                  className={inputClass}
-                />
-                <span className="text-[#c4a882] text-sm flex-shrink-0">
-                  —
-                </span>
-                <input
-                  type="number"
-                  placeholder="To"
-                  value={draft.year_max}
-                  min={1000}
-                  max={new Date().getFullYear()}
-                  onChange={(e) =>
-                    setDraft((d) => ({ ...d, year_max: e.target.value }))
-                  }
-                  className={inputClass}
-                />
-              </div>
+            <div className="flex border-t border-[#d4b896]/20">
+              <button
+                onClick={clearFilters}
+                className="flex-1 py-3 text-[0.68rem] tracking-[0.1em] uppercase font-medium text-[#8a7968] hover:text-[#1a1714] transition-colors border-r border-[#d4b896]/20"
+              >
+                Clear all
+              </button>
+              <button
+                onClick={applyFilters}
+                className="flex-1 py-3 text-[0.68rem] tracking-[0.1em] uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
+              >
+                Apply
+              </button>
             </div>
-
-            <div className="border-t border-[#d4b896]/20" />
-
-            {/* Rating threshold */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className={labelClass + " mb-0"}>
-                  Min. rating
-                </label>
-                <span className="text-[0.72rem] text-[#8a7968]">
-                  {draft.rating_min
-                    ? `${draft.rating_min}★ and above`
-                    : "Any"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {["1", "2", "3", "4", "4.5"].map((val) => (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() =>
-                      setDraft((d) => ({
-                        ...d,
-                        rating_min: d.rating_min === val ? "" : val,
-                      }))
-                    }
-                    className={`flex-1 py-1.5 text-[0.72rem] font-medium border transition-colors ${
-                      draft.rating_min === val
-                        ? "bg-[#1a1714] text-[#f5f0e8] border-[#1a1714]"
-                        : "text-[#8a7968] border-[#d4b896]/40 hover:border-[#d4b896] hover:text-[#1a1714]"
-                    }`}
-                  >
-                    {val}★
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex border-t border-[#d4b896]/20">
-            <button
-              onClick={clearFilters}
-              className="flex-1 py-3 text-[0.68rem] tracking-[0.1em] uppercase font-medium text-[#8a7968] hover:text-[#1a1714] transition-colors border-r border-[#d4b896]/20"
-            >
-              Clear all
-            </button>
-            <button
-              onClick={applyFilters}
-              className="flex-1 py-3 text-[0.68rem] tracking-[0.1em] uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
-            >
-              Apply
-            </button>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

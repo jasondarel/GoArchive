@@ -15,6 +15,7 @@ export interface Book {
   genre?: { id: number; name: string };
   year?: number | null;
   rating?: number | null;
+  favorites_count?: number;
 }
 
 interface BookCardProps {
@@ -250,6 +251,11 @@ export default function BookCard({
           {book.year && (
             <span className="text-[0.6rem] tracking-[0.1em] text-[#c4a882]">
               {book.year}
+            </span>
+          )}
+          {book.favorites_count !== undefined && book.favorites_count > 0 && (
+            <span className="text-[0.6rem] text-[#c0735a] flex items-center gap-0.5 ml-1">
+              <Heart size={9} className="fill-[#c0735a]" /> {book.favorites_count}
             </span>
           )}
           {book.rating != null && (

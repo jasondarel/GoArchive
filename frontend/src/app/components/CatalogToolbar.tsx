@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Search, X, Check, ArrowUpDown } from "lucide-react";
 import { useSearch } from "@/context/SearchContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SORT_OPTIONS = [
   { value: "", label: "Default" },
@@ -102,40 +103,48 @@ export default function CatalogToolbar() {
           <ArrowUpDown size={14} />
         </button>
 
-        {sortOpen && (
-          <div className="absolute right-0 top-full mt-2 w-56 bg-[#f5f0e8] border border-[#d4b896]/50 shadow-[0_12px_40px_rgba(26,23,20,0.15)] z-50">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#d4b896]/20">
-              <p className="text-[0.65rem] tracking-[0.15em] uppercase font-medium text-[#1a1714]">
-                Sort by
-              </p>
-              <button
-                onClick={() => setSortOpen(false)}
-                className="text-[#c4a882] hover:text-[#1a1714] transition-colors"
-              >
-                <X size={13} />
-              </button>
-            </div>
-            <div className="p-2 space-y-0.5">
-              {SORT_OPTIONS.map((opt) => (
+        <AnimatePresence>
+          {sortOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-0 top-full mt-2 w-56 bg-[#f5f0e8] border border-[#d4b896]/50 shadow-[0_12px_40px_rgba(26,23,20,0.15)] z-50"
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[#d4b896]/20">
+                <p className="text-[0.65rem] tracking-[0.15em] uppercase font-medium text-[#1a1714]">
+                  Sort by
+                </p>
                 <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => applySort(opt.value)}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-[0.8rem] transition-colors ${
-                    activeSort === opt.value
-                      ? "bg-[#1a1714] text-[#f5f0e8]"
-                      : "text-[#3d342c] hover:bg-[#ede8de]"
-                  }`}
+                  onClick={() => setSortOpen(false)}
+                  className="text-[#c4a882] hover:text-[#1a1714] transition-colors"
                 >
-                  <span>{opt.label}</span>
-                  {activeSort === opt.value && (
-                    <Check size={11} className="text-[#c4a882]" />
-                  )}
+                  <X size={13} />
                 </button>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
+              <div className="p-2 space-y-0.5">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => applySort(opt.value)}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-[0.8rem] transition-colors ${
+                      activeSort === opt.value
+                        ? "bg-[#1a1714] text-[#f5f0e8]"
+                        : "text-[#3d342c] hover:bg-[#ede8de]"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    {activeSort === opt.value && (
+                      <Check size={11} className="text-[#c4a882]" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
