@@ -23,7 +23,7 @@ export default function MainLayout({
           onClose={() => setShowUploadModal(false)}
           onSuccess={() => {
             setShowUploadModal(false);
-            // TODO: trigger catalog refresh
+            window.dispatchEvent(new CustomEvent("book-added"));
           }}
         />
       )}

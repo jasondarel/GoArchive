@@ -2,16 +2,38 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: connect to API
+    setError(null);
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      router.push("/catalog");
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status;
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      if (status === 401 || status === 422) {
+        setError(msg || "Invalid email or password.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,9 +77,10 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden mb-8">
             <span className="font-serif text-2xl text-[#1a1714] tracking-wider">
-              E<span className="text-[#d4b896]">·</span>Library
+              Go<span className="text-[#d4b896]">·</span>Archive
             </span>
           </div>
+
           <p className="text-[0.65rem] tracking-[0.2em] uppercase text-[#c4a882] font-medium mb-2">
             Welcome Back
           </p>
@@ -75,6 +98,14 @@ export default function LoginPage() {
               Register
             </Link>
           </p>
+
+          {/* Error banner */}
+          {error && (
+            <div className="mb-6 px-4 py-3 bg-[#c0735a]/10 border-l-2 border-[#c0735a] text-[0.8rem] text-[#c0735a]">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-7">
             {/* Email */}
             <div>
@@ -88,7 +119,8 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors"
+                disabled={isLoading}
+                className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors disabled:opacity-50"
               />
             </div>
 
@@ -105,7 +137,8 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 pr-8 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors"
+                  disabled={isLoading}
+                  className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 pr-8 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -121,28 +154,19 @@ export default function LoginPage() {
             {/* Submit */}
             <button
               type="submit"
-              className="w-full mt-4 bg-[#1a1714] text-[#f5f0e8] py-3.5 text-[0.75rem] tracking-[0.15em] uppercase font-medium hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
+              disabled={isLoading}
+              className="w-full mt-4 bg-[#1a1714] text-[#f5f0e8] py-3.5 text-[0.75rem] tracking-[0.15em] uppercase font-medium hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Masuk
+              {isLoading ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Signing in…
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
-          {/* Demo accounts
-          <div className="mt-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-[#d4b896]/30" />
-              <span className="text-[0.65rem] tracking-[0.15em] uppercase text-[#c4a882]">
-                Demo
-              </span>
-              <div className="flex-1 h-px bg-[#d4b896]/30" />
-            </div>
-            <div className="bg-[#ede8de] border-l-2 border-[#d4b896] px-4 py-3.5 text-[0.78rem] text-[#5a4f42] leading-7">
-              <p className="text-[0.65rem] tracking-[0.12em] uppercase text-[#1a1714] font-medium mb-1">
-                Akun Demo
-              </p>
-              <p>Admin — admin@elibrary.com / Admin123</p>
-              <p>User &nbsp;— user@elibrary.com / User1234</p>
-            </div>
-          </div> */}
         </div>
       </div>
     </div>

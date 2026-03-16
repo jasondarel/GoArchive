@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, ImagePlus } from "lucide-react";
+import { X, ImagePlus, Loader2 } from "lucide-react";
 import { Book } from "./BookCard";
+import api from "@/lib/axios";
 
 interface BookFormModalProps {
   onClose: () => void;
@@ -24,14 +25,24 @@ export default function BookFormModal({
     editBook?.image_url || null,
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEdit = !!editBook;
 
   const update =
     (key: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
+      if (fieldErrors[key]) {
+        setFieldErrors((prev) => {
+          const n = { ...prev };
+          delete n[key];
+          return n;
+        });
+      }
+    };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,11 +53,59 @@ export default function BookFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setFieldErrors({});
     setIsLoading(true);
-    // TODO: connect to API
-    await new Promise((r) => setTimeout(r, 800)); // simulate
-    setIsLoading(false);
-    onSuccess();
+
+    try {
+      // Backend expects FormData (multipart) because of image upload
+      const data = new FormData();
+      data.append("title", form.title);
+      data.append("description", form.description);
+      if (imageFile) {
+        data.append("image", imageFile);
+      }
+
+      if (isEdit) {
+        // Laravel route uses POST + _method=PUT for FormData
+        data.append("_method", "PUT");
+        await api.post(`/books/${editBook!.id}`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        await api.post("/books", data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+
+      onSuccess();
+    } catch (err: unknown) {
+      const response = (
+        err as {
+          response?: {
+            status?: number;
+            data?: {
+              message?: string;
+              errors?: Record<string, string[]>;
+            };
+          };
+        }
+      )?.response;
+
+      if (response?.status === 422 && response.data?.errors) {
+        const mapped: Record<string, string> = {};
+        for (const [key, msgs] of Object.entries(response.data.errors)) {
+          mapped[key] = Array.isArray(msgs) ? msgs[0] : msgs;
+        }
+        setFieldErrors(mapped);
+      } else {
+        setError(
+          response?.data?.message || "Something went wrong. Please try again.",
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Close on ESC
@@ -67,9 +126,9 @@ export default function BookFormModal({
       />
 
       {/* Modal */}
-      <div className="relative z-10 bg-[#f5f0e8] w-full max-w-lg border border-[#d4b896]/30">
+      <div className="relative z-10 bg-[#f5f0e8] w-full max-w-lg border border-[#d4b896]/30 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#d4b896]/20">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#d4b896]/20 sticky top-0 bg-[#f5f0e8] z-10">
           <div>
             <p className="text-[0.6rem] tracking-[0.2em] uppercase text-[#c4a882]">
               {isEdit ? "Edit Book" : "New Book"}
@@ -87,78 +146,102 @@ export default function BookFormModal({
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Image upload */}
-          <div>
-            <label className="block text-[0.65rem] tracking-[0.15em] uppercase text-[#8a7968] font-medium mb-3">
-              Cover Image
-            </label>
-            <div
-              className="relative border border-dashed border-[#d4b896]/50 hover:border-[#d4b896] transition-colors cursor-pointer overflow-hidden"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {imagePreview ? (
-                <div className="relative h-48">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-[#1a1714]/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <span className="text-[0.65rem] tracking-[0.15em] uppercase text-[#f5f0e8]">
-                      Change image
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-36 flex flex-col items-center justify-center gap-2">
-                  <ImagePlus size={24} className="text-[#c4a882]" />
-                  <p className="text-[0.75rem] text-[#c4a882]">
-                    Click to upload cover image
-                  </p>
-                  <p className="text-[0.65rem] text-[#c4a882]/60">
-                    JPG, PNG, WEBP — max 2MB
-                  </p>
-                </div>
-              )}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* General error */}
+          {error && (
+            <div className="px-4 py-3 bg-[#c0735a]/10 border-l-2 border-[#c0735a] text-[0.8rem] text-[#c0735a]">
+              {error}
             </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpg,image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={handleImageChange}
-            />
-          </div>
+          )}
 
-          {/* Title */}
-          <div>
-            <label className="block text-[0.65rem] tracking-[0.15em] uppercase text-[#8a7968] font-medium mb-2">
-              Book Title
-            </label>
-            <input
-              type="text"
-              placeholder="Enter book title"
-              value={form.title}
-              onChange={update("title")}
-              required
-              className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors"
-            />
-          </div>
+          {/* Two-column: cover left, fields right */}
+          <div className="flex gap-5 items-start">
+            {/* Cover — 2:3 ratio but narrow so it doesn't dominate */}
+            <div className="flex-shrink-0 w-28">
+              <label className="block text-[0.65rem] tracking-[0.15em] uppercase text-[#8a7968] font-medium mb-2">
+                Cover
+              </label>
+              <div
+                className="relative aspect-[2/3] border border-dashed border-[#d4b896]/50 hover:border-[#d4b896] transition-colors cursor-pointer overflow-hidden bg-[#ede8de]"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {imagePreview ? (
+                  <>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-[#1a1714]/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                      <span className="text-[0.6rem] tracking-[0.1em] uppercase text-[#f5f0e8] text-center px-1">
+                        Change
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+                    <ImagePlus size={20} className="text-[#c4a882]" />
+                    <p className="text-[0.6rem] text-[#c4a882] text-center px-1 leading-snug">
+                      Click to upload
+                    </p>
+                  </div>
+                )}
+              </div>
+              <p className="text-[0.6rem] text-[#c4a882]/60 mt-1.5 leading-snug">
+                JPG, PNG, WEBP · max 2MB
+              </p>
+              {fieldErrors.image && (
+                <p className="text-[0.72rem] text-[#c0735a] mt-1">{fieldErrors.image}</p>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpg,image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-[0.65rem] tracking-[0.15em] uppercase text-[#8a7968] font-medium mb-2">
-              Description
-            </label>
-            <textarea
-              placeholder="Write a short description..."
-              value={form.description}
-              onChange={update("description")}
-              required
-              rows={3}
-              className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors resize-none"
-            />
+            {/* Fields */}
+            <div className="flex-1 space-y-5">
+              {/* Title */}
+              <div>
+                <label className="block text-[0.65rem] tracking-[0.15em] uppercase text-[#8a7968] font-medium mb-2">
+                  Book Title
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter book title"
+                  value={form.title}
+                  onChange={update("title")}
+                  required
+                  disabled={isLoading}
+                  className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors disabled:opacity-50"
+                />
+                {fieldErrors.title && (
+                  <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.title}</p>
+                )}
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-[0.65rem] tracking-[0.15em] uppercase text-[#8a7968] font-medium mb-2">
+                  Description
+                </label>
+                <textarea
+                  placeholder="Write a short description..."
+                  value={form.description}
+                  onChange={update("description")}
+                  required
+                  rows={4}
+                  disabled={isLoading}
+                  className="w-full bg-transparent border-b border-[#c4a882]/50 pb-2.5 text-[0.9375rem] text-[#1a1714] placeholder-[#c4a882]/50 focus:outline-none focus:border-[#1a1714] transition-colors resize-none disabled:opacity-50"
+                />
+                {fieldErrors.description && (
+                  <p className="text-[0.72rem] text-[#c0735a] mt-1.5">{fieldErrors.description}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Actions */}
@@ -166,19 +249,30 @@ export default function BookFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 text-[0.72rem] tracking-[0.1em] uppercase font-medium text-[#8a7968] border border-[#d4b896]/40 hover:border-[#d4b896] transition-colors"
+              disabled={isLoading}
+              className="flex-1 py-3 text-[0.72rem] tracking-[0.1em] uppercase font-medium text-[#8a7968] border border-[#d4b896]/40 hover:border-[#d4b896] transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 py-3 text-[0.72rem] tracking-[0.1em] uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300 disabled:opacity-50"
+              className="flex-1 py-3 text-[0.72rem] tracking-[0.1em] uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {isLoading ? "Saving..." : isEdit ? "Update Book" : "Add Book"}
+              {isLoading ? (
+                <>
+                  <Loader2 size={13} className="animate-spin" />
+                  Saving…
+                </>
+              ) : isEdit ? (
+                "Update Book"
+              ) : (
+                "Add Book"
+              )}
             </button>
           </div>
         </form>
+
       </div>
     </div>
   );

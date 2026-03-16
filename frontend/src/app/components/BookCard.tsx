@@ -107,7 +107,7 @@ export default function BookCard({
               e.stopPropagation();
               onFavoriteToggle?.(book.id);
             }}
-            className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-[#1a1714]/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#1a1714]"
+            className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center bg-[#1a1714]/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#1a1714]"
             aria-label={
               book.is_favorited ? "Remove from favorites" : "Add to favorites"
             }

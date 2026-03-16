@@ -14,7 +14,7 @@ export default function Navbar({ onUploadClick }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading: authLoading } = useAuth();
 
   const [searchValue, setSearchValue] = useState(searchParams.get("q") || "");
 
@@ -86,8 +86,12 @@ export default function Navbar({ onUploadClick }: NavbarProps) {
             </div>
           )}
 
-          {/* Upload button — admin only */}
-          {user && isAdmin() && (
+          {/* Upload button — admin only.
+               During auth hydration render an invisible same-size placeholder
+               so the navbar width doesn't shift once the user loads. */}
+          {authLoading ? (
+            <div className="w-[4.5rem] h-8 opacity-0 pointer-events-none" aria-hidden />
+          ) : user && isAdmin() ? (
             <button
               onClick={onUploadClick}
               className="flex items-center gap-2 bg-[#1a1714] text-[#f5f0e8] px-4 py-2 text-[0.7rem] tracking-[0.1em] uppercase font-medium hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
@@ -95,18 +99,20 @@ export default function Navbar({ onUploadClick }: NavbarProps) {
               <Upload size={13} />
               Upload
             </button>
-          )}
+          ) : null}
 
-          {/* Avatar */}
-          {user && (
-            <Link href="/profil">
+          {/* Avatar — placeholder keeps width reserved during hydration */}
+          {authLoading ? (
+            <div className="w-8 h-8 rounded-full bg-[#d4b896]/20 opacity-0 pointer-events-none" aria-hidden />
+          ) : user ? (
+            <Link href="/profile">
               <div className="w-8 h-8 rounded-full bg-[#1a1714] flex items-center justify-center hover:bg-[#d4b896] transition-colors">
                 <span className="text-[0.65rem] text-[#d4b896] hover:text-[#1a1714] font-medium uppercase">
                   {user.name.charAt(0)}
                 </span>
               </div>
             </Link>
-          )}
+          ) : null}
         </div>
       </div>
 

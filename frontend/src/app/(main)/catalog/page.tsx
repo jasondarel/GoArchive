@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import BookCard, { Book } from "../../components/BookCard";
 import BookFormModal from "../../components/BookFormModal";
+import api from "@/lib/axios";
 
 // Skeleton card
 function SkeletonCard() {
@@ -20,91 +21,72 @@ function SkeletonCard() {
   );
 }
 
-// Dummy data for UI preview (replace with API call)
-const DUMMY_BOOKS: Book[] = [
-  {
-    id: 1,
-    title: "Laskar Pelangi",
-    description:
-      "Novel karya Andrea Hirata yang mengisahkan perjuangan anak-anak Belitung dalam menggapai mimpi mereka di tengah keterbatasan.",
-    image_url: null,
-  },
-  {
-    id: 2,
-    title: "Bumi Manusia",
-    description:
-      "Karya monumental Pramoedya Ananta Toer yang menggambarkan pergolakan sosial di era kolonial Belanda melalui kisah Minke.",
-    image_url: null,
-  },
-  {
-    id: 3,
-    title: "Atomic Habits",
-    description:
-      "Buku karya James Clear yang membahas cara membangun kebiasaan kecil yang memberikan perubahan luar biasa dalam hidup.",
-    image_url: null,
-  },
-  {
-    id: 4,
-    title: "Clean Code",
-    description:
-      "Panduan dari Robert C. Martin tentang cara menulis kode yang bersih, mudah dibaca, dan mudah dipelihara.",
-    image_url: null,
-  },
-  {
-    id: 5,
-    title: "The Pragmatic Programmer",
-    description:
-      "Buku klasik oleh Andrew Hunt dan David Thomas berisi tips pragmatis untuk menjadi programmer yang lebih baik.",
-    image_url: null,
-  },
-  {
-    id: 6,
-    title: "Sapiens",
-    description:
-      "A Brief History of Humankind by Yuval Noah Harari — tracing the history of the human species from the Stone Age to the present.",
-    image_url: null,
-  },
-];
-
 export default function KatalogPage() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
 
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editBook, setEditBook] = useState<Book | null>(null);
   const [showEdit, setShowEdit] = useState(false);
 
   const fetchBooks = useCallback(async () => {
     setIsLoading(true);
-    // TODO: replace with API call
-    // const res = await api.get(`/books?search=${searchQuery}`);
-    // setBooks(res.data.data);
-    await new Promise((r) => setTimeout(r, 600)); // simulate network
-    const filtered = DUMMY_BOOKS.filter((b) =>
-      b.title.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-    setBooks(filtered);
-    setIsLoading(false);
+    setError(null);
+    try {
+      const res = await api.get("/books", {
+        params: searchQuery ? { search: searchQuery } : {},
+      });
+      // Laravel API Resource collection: { data: [...] }
+      setBooks(res.data.data ?? res.data);
+    } catch {
+      setError("Failed to load books. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [searchQuery]);
 
   useEffect(() => {
     fetchBooks();
   }, [fetchBooks]);
 
+  // Re-fetch when a new book is added via the Navbar upload modal
+  useEffect(() => {
+    const handler = () => fetchBooks();
+    window.addEventListener("book-added", handler);
+    return () => window.removeEventListener("book-added", handler);
+  }, [fetchBooks]);
+
   const handleFavoriteToggle = async (bookId: number) => {
-    // TODO: call API
+    // Optimistic update
     setBooks((prev) =>
       prev.map((b) =>
         b.id === bookId ? { ...b, is_favorited: !b.is_favorited } : b,
       ),
     );
+    try {
+      await api.post(`/favorites/${bookId}`);
+    } catch {
+      // Revert on failure
+      setBooks((prev) =>
+        prev.map((b) =>
+          b.id === bookId ? { ...b, is_favorited: !b.is_favorited } : b,
+        ),
+      );
+    }
   };
 
   const handleDelete = async (bookId: number) => {
     if (!confirm("Are you sure you want to delete this book?")) return;
-    // TODO: call API
+    // Optimistic update
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
+    try {
+      await api.delete(`/books/${bookId}`);
+    } catch {
+      // Revert on failure
+      fetchBooks();
+    }
   };
 
   const handleEdit = (book: Book) => {
@@ -121,7 +103,7 @@ export default function KatalogPage() {
         </p>
         <h1 className="font-serif text-4xl text-[#1a1714]">Catalog</h1>
 
-        {searchQuery && (
+        {searchQuery && !isLoading && (
           <p className="text-sm text-[#8a7968] mt-2 font-light">
             Showing results for{" "}
             <span className="text-[#1a1714] font-medium">"{searchQuery}"</span>{" "}
@@ -136,6 +118,23 @@ export default function KatalogPage() {
           {Array.from({ length: 10 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
+        </div>
+      ) : error ? (
+        /* Error state */
+        <div className="flex flex-col items-center justify-center py-32 text-center">
+          <div className="w-16 h-16 rounded-full bg-[#ede8de] flex items-center justify-center mb-4">
+            <BookOpen size={28} className="text-[#c4a882]" />
+          </div>
+          <p className="font-serif text-xl text-[#1a1714] mb-1">
+            Something went wrong
+          </p>
+          <p className="text-sm text-[#8a7968] font-light mb-4">{error}</p>
+          <button
+            onClick={fetchBooks}
+            className="text-[0.65rem] tracking-[0.15em] uppercase border border-[#d4b896]/50 px-4 py-2 text-[#8a7968] hover:bg-[#d4b896]/10 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       ) : books.length === 0 ? (
         /* Empty state */

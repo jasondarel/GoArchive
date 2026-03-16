@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Heart } from "lucide-react";
 import BookCard, { Book } from "../../components/BookCard";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import api from "@/lib/axios";
 
 function SkeletonCard() {
   return (
@@ -19,64 +20,49 @@ function SkeletonCard() {
   );
 }
 
-// Dummy data — replace with API call
-const DUMMY_FAVORITES: Book[] = [
-  {
-    id: 1,
-    title: "Laskar Pelangi",
-    description:
-      "Novel karya Andrea Hirata yang mengisahkan perjuangan anak-anak Belitung dalam menggapai mimpi mereka di tengah keterbatasan.",
-    image_url: null,
-    is_favorited: true,
-  },
-  {
-    id: 3,
-    title: "Atomic Habits",
-    description:
-      "Buku karya James Clear yang membahas cara membangun kebiasaan kecil yang memberikan perubahan luar biasa dalam hidup.",
-    image_url: null,
-    is_favorited: true,
-  },
-  {
-    id: 6,
-    title: "Sapiens",
-    description:
-      "A Brief History of Humankind by Yuval Noah Harari — tracing the history of the human species from the Stone Age to the present.",
-    image_url: null,
-    is_favorited: true,
-  },
-];
-
-export default function FavoritPage() {
+export default function FavoritePage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  //   useEffect(() => {
-  //     if (!authLoading && !user) {
-  //       router.push("/login");
-  //     }
-  //   }, [user, authLoading, router]);
-
+  // Redirect to login if not authenticated
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, authLoading, router]);
+
+  const fetchFavorites = useCallback(async () => {
     if (!user) return;
-    const fetch = async () => {
-      setIsLoading(true);
-      // TODO: replace with API call
-      // const res = await api.get('/favorites');
-      // setBooks(res.data);
-      await new Promise((r) => setTimeout(r, 600));
-      setBooks(DUMMY_FAVORITES);
+    setIsLoading(true);
+    try {
+      const res = await api.get("/favorites");
+      // Backend returns a flat array of book objects with is_favorited: true
+      setBooks(res.data.data ?? res.data);
+    } catch {
+      setBooks([]);
+    } finally {
       setIsLoading(false);
-    };
-    fetch();
+    }
   }, [user]);
 
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
+
   const handleFavoriteToggle = async (bookId: number) => {
-    // TODO: call API DELETE /favorites/{bookId}
+    // Optimistically remove from the list (unfavoriting is the only action here)
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
+    try {
+      await api.post(`/favorites/${bookId}`);
+    } catch {
+      // Revert on failure
+      fetchFavorites();
+    }
   };
+
+  if (!user && !authLoading) return null;
 
   return (
     <div>
@@ -101,7 +87,7 @@ export default function FavoritPage() {
           ))}
         </div>
       ) : books.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="w-16 h-16 rounded-full bg-[#ede8de] flex items-center justify-center mb-4">
             <Heart size={28} className="text-[#c4a882]" />
           </div>
@@ -112,7 +98,7 @@ export default function FavoritPage() {
             Browse the catalog and save books you love.
           </p>
           <button
-            onClick={() => router.push("/katalog")}
+            onClick={() => router.push("/catalog")}
             className="px-6 py-2.5 bg-[#1a1714] text-[#f5f0e8] text-[0.72rem] tracking-[0.12em] uppercase font-medium hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300"
           >
             Browse Catalog
