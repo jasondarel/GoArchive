@@ -9,7 +9,7 @@ class BookController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Book::query()->with('user:id,name');
+        $query = Book::query()->with(['user:id,name', 'genre:id,name']);
 
         if ($request->filled('search')) {
             $query->where('title', 'ilike', '%' . $request->search . '%');
@@ -35,7 +35,7 @@ class BookController extends Controller
 
     public function show(Request $request, Book $book)
     {
-        $book->load('user:id,name');
+        $book->load(['user:id,name', 'genre:id,name']);
 
         if ($request->user()) {
             $book->is_favorited = $request->user()
@@ -53,6 +53,9 @@ class BookController extends Controller
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'genre_id'    => 'nullable|exists:genres,id',
+            'year'        => 'nullable|integer|min:1000|max:' . (date('Y') + 1),
+            'rating'      => 'nullable|numeric|min:0|max:5',
         ]);
 
         $imagePath = null;
@@ -65,7 +68,12 @@ class BookController extends Controller
             'title'       => $validated['title'],
             'description' => $validated['description'],
             'image_path'  => $imagePath,
+            'genre_id'    => $validated['genre_id'] ?? null,
+            'year'        => $validated['year'] ?? null,
+            'rating'      => $validated['rating'] ?? null,
         ]);
+
+        $book->load('genre:id,name');
 
         return response()->json($book, 201);
     }
@@ -76,6 +84,9 @@ class BookController extends Controller
             'title'       => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'genre_id'    => 'nullable|exists:genres,id',
+            'year'        => 'nullable|integer|min:1000|max:' . (date('Y') + 1),
+            'rating'      => 'nullable|numeric|min:0|max:5',
         ]);
 
         if ($request->hasFile('image')) {
@@ -88,6 +99,8 @@ class BookController extends Controller
 
         unset($validated['image']);
         $book->update($validated);
+
+        $book->load('genre:id,name');
 
         return response()->json($book);
     }

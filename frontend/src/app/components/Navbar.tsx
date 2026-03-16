@@ -90,7 +90,10 @@ export default function Navbar({ onUploadClick }: NavbarProps) {
                During auth hydration render an invisible same-size placeholder
                so the navbar width doesn't shift once the user loads. */}
           {authLoading ? (
-            <div className="w-[4.5rem] h-8 opacity-0 pointer-events-none" aria-hidden />
+            <div
+              className="w-[4.5rem] h-8 opacity-0 pointer-events-none"
+              aria-hidden
+            />
           ) : user && isAdmin() ? (
             <button
               onClick={onUploadClick}
@@ -103,7 +106,10 @@ export default function Navbar({ onUploadClick }: NavbarProps) {
 
           {/* Avatar — placeholder keeps width reserved during hydration */}
           {authLoading ? (
-            <div className="w-8 h-8 rounded-full bg-[#d4b896]/20 opacity-0 pointer-events-none" aria-hidden />
+            <div
+              className="w-8 h-8 rounded-full bg-[#d4b896]/20 opacity-0 pointer-events-none"
+              aria-hidden
+            />
           ) : user ? (
             <Link href="/profile">
               <div className="w-8 h-8 rounded-full bg-[#1a1714] flex items-center justify-center hover:bg-[#d4b896] transition-colors">

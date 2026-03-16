@@ -3,11 +3,13 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\GenreController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::get('/genres', [GenreController::class, 'index']);
 
 // Catalog - public but with optional auth context (for is_favorited)
 Route::middleware('auth:sanctum')->get('/books/{book}', [BookController::class, 'show']);
@@ -25,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Books CRUD - admin only
     Route::middleware('admin')->group(function () {
         Route::post('/books', [BookController::class, 'store']);
-        Route::post('/books/{book}', [BookController::class, 'update']); // POST with _method=PUT for FormData
+        Route::match(['POST', 'PUT'], '/books/{book}', [BookController::class, 'update']);
         Route::delete('/books/{book}', [BookController::class, 'destroy']);
     });
 });

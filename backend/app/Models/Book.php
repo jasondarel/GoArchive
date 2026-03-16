@@ -14,6 +14,9 @@ class Book extends Model
         'title',
         'description',
         'image_path',
+        'genre_id',
+        'year',
+        'rating',
     ];
 
     protected $appends = ['image_url'];
@@ -28,6 +31,11 @@ class Book extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function genre()
+    {
+        return $this->belongsTo(Genre::class);
     }
 
     public function favorites()

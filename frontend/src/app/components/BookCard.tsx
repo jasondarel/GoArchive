@@ -11,6 +11,9 @@ export interface Book {
   image_url: string | null;
   is_favorited?: boolean;
   user?: { id: number; name: string };
+  genre?: { id: number; name: string };
+  year?: number | null;
+  rating?: number | null;
 }
 
 interface BookCardProps {
@@ -135,6 +138,25 @@ export default function BookCard({
         <p className="text-[0.75rem] text-[#8a7968] font-light leading-relaxed line-clamp-2 flex-1">
           {book.description}
         </p>
+
+        {/* Meta tags: genre, year, rating */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          {book.genre && (
+            <span className="text-[0.6rem] tracking-[0.1em] uppercase px-1.5 py-0.5 bg-[#d4b896]/20 text-[#8a7968] border border-[#d4b896]/30">
+              {book.genre.name}
+            </span>
+          )}
+          {book.year && (
+            <span className="text-[0.6rem] tracking-[0.1em] text-[#c4a882]">
+              {book.year}
+            </span>
+          )}
+          {book.rating != null && (
+            <span className="ml-auto text-[0.6rem] text-[#c4a882] font-medium">
+              ★ {Number(book.rating).toFixed(1)}
+            </span>
+          )}
+        </div>
 
         {/* Admin actions */}
         {isAdmin() && (
