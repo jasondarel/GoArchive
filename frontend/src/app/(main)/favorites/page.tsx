@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { Heart } from "lucide-react";
 import BookCard, { Book } from "../../components/BookCard";
 import BookFilter from "../../components/BookFilter";
@@ -27,7 +27,7 @@ function SkeletonCard() {
   );
 }
 
-export default function FavoritePage() {
+function FavoritePageContent() {
   const { user, isLoading: authLoading } = useAuth();
   const { searchQuery } = useSearch();
   const router = useRouter();
@@ -229,5 +229,13 @@ export default function FavoritePage() {
         isDestructive={true}
       />
     </div>
+  );
+}
+
+export default function FavoritePage() {
+  return (
+    <Suspense>
+      <FavoritePageContent />
+    </Suspense>
   );
 }
