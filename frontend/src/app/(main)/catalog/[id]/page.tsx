@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { ArrowLeft, Heart, Edit2, Trash2, Loader2 } from "lucide-react";
 import { Book } from "../..//../components/BookCard";
 import { useAuth } from "../../../../context/AuthContext";
@@ -187,10 +188,12 @@ export default function BookDetailPage() {
           <div className="w-full sm:w-64 shrink-0">
             <div className="aspect-2/3 overflow-hidden relative">
               {book.image_url ? (
-                <img
+                <Image
                   src={book.image_url}
                   alt={book.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  unoptimized
+                  className="object-cover"
                 />
               ) : (
                 <PlaceholderCover title={book.title} bookId={book.id} />

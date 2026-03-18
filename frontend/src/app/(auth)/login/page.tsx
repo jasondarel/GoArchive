@@ -72,7 +72,7 @@ export default function LoginPage() {
         {/* Quote */}
         <div className="relative z-10">
           <blockquote className="font-serif text-[1.6rem] leading-relaxed text-[#f5f0e8] italic mb-4">
-            "A reader lives a thousand lives before he dies."
+            &quot;A reader lives a thousand lives before he dies.&quot;
           </blockquote>
           <cite className="text-[0.7rem] tracking-[0.15em] uppercase text-[#d4b896]/70 not-italic">
             — George R.R. Martin
@@ -99,7 +99,7 @@ export default function LoginPage() {
             Your Account
           </h1>
           <p className="text-sm text-[#8a7968] font-light mb-10">
-            Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
             <Link
               href="/register"
               className="text-[#1a1714] font-medium underline underline-offset-4"

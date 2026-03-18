@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSearch } from "@/context/SearchContext";
@@ -45,7 +45,6 @@ export default function CatalogPageWrapper() {
 function CatalogPage() {
   const { user } = useAuth();
   const { searchQuery } = useSearch();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [books, setBooks] = useState<Book[]>([]);
@@ -161,7 +160,7 @@ function CatalogPage() {
         {searchQuery && !isLoading && (
           <p className="text-sm text-[#8a7968] mt-2 font-light">
             Showing results for{" "}
-            <span className="text-[#1a1714] font-medium">"{searchQuery}"</span>{" "}
+            <span className="text-[#1a1714] font-medium">&quot;{searchQuery}&quot;</span>{" "}
             — {filteredBooks.length}{" "}
             {filteredBooks.length === 1 ? "book" : "books"} found
           </p>

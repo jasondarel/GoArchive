@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { X, ImagePlus, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Book } from "./BookCard";
@@ -224,10 +225,12 @@ export default function BookFormModal({
               >
                 {imagePreview ? (
                   <>
-                    <img
+                    <Image
                       src={imagePreview}
                       alt="Preview"
-                      className="w-full h-full object-cover"
+                      fill
+                      unoptimized
+                      className="object-cover"
                     />
                     <div className="absolute inset-0 bg-[#1a1714]/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                       <span className="text-[0.6rem] tracking-widest uppercase text-[#f5f0e8] text-center px-1">

@@ -326,7 +326,7 @@ export default function RegisterPage() {
               </div>
               {form.password_confirmation.length > 0 && !passwordsMatch && (
                 <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
-                  Passwords don't match
+                  Passwords don&apos;t match
                 </p>
               )}
             </div>

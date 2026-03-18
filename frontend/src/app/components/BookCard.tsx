@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart, Edit2, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -142,10 +143,12 @@ export default function BookCard({
       {/* Cover */}
       <div className="relative aspect-2/3 overflow-hidden bg-[#2c2420]">
         {book.image_url ? (
-          <img
+          <Image
             src={book.image_url}
             alt={book.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            unoptimized
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <PlaceholderCover title={book.title} bookId={book.id} />

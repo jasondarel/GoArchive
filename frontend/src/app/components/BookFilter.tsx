@@ -67,15 +67,20 @@ export default function BookFilter() {
 
   // Sync draft when panel opens
   useEffect(() => {
-    if (filterOpen) {
-      setDraft({
-        genre: searchParams.get("genre") || "",
-        year_min: searchParams.get("year_min") || "",
-        year_max: searchParams.get("year_max") || "",
-        rating_min: searchParams.get("rating_min") || "",
-      });
-    }
-  }, [filterOpen, searchParams]);
+    // Only set draft when the panel is opened
+    // Avoid making this run on every render/continously by using it inside a handler if possible
+    // Alternatively, sync when explicitly requested to open the panel
+  }, []);
+
+  const handleOpenFilter = () => {
+    setFilterOpen(true);
+    setDraft({
+      genre: searchParams.get("genre") || "",
+      year_min: searchParams.get("year_min") || "",
+      year_max: searchParams.get("year_max") || "",
+      rating_min: searchParams.get("rating_min") || "",
+    });
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -134,7 +139,7 @@ export default function BookFilter() {
   return (
     <div ref={filterRef} className="relative">
       <button
-        onClick={() => setFilterOpen((o) => !o)}
+        onClick={filterOpen ? () => setFilterOpen(false) : handleOpenFilter}
         className={`relative flex items-center gap-1.5 px-3 py-2 text-[0.7rem] tracking-widest uppercase font-medium transition-colors duration-200 border ${
           filterOpen || activeFilterCount > 0
             ? "bg-[#1a1714] text-[#f5f0e8] border-[#1a1714]"
