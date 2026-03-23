@@ -47,13 +47,21 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/catalog");
     } catch (err: unknown) {
-      const response = (err as any)?.response;
+      const response = (
+        err as {
+          response?: {
+            status?: number;
+            data?: { message?: string };
+            headers?: { "retry-after"?: string };
+          };
+        }
+      )?.response;
       const status = response?.status;
       const msg = response?.data?.message;
 
       if (status === 429) {
         const retryAfter = parseInt(
-          response.headers?.["retry-after"] || "60",
+          response?.headers?.["retry-after"] || "60",
           10,
         );
         setError(
