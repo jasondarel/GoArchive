@@ -7,8 +7,8 @@ use App\Http\Controllers\GenreController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
 Route::get('/genres', [GenreController::class, 'index']);
 
 // Catalog - public but with optional auth context (for is_favorited)
