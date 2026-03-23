@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -15,6 +15,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown !== null && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => (prev !== null && prev > 1 ? prev - 1 : null));
+      }, 1000);
+    } else if (countdown === 0) {
+      setError(null);
+      setCountdown(null);
+    }
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -33,9 +47,20 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/catalog");
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status;
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      if (status === 401 || status === 422) {
+      const response = (err as any)?.response;
+      const status = response?.status;
+      const msg = response?.data?.message;
+
+      if (status === 429) {
+        const retryAfter = parseInt(
+          response.headers?.["retry-after"] || "60",
+          10,
+        );
+        setError(
+          `You are doing this too fast. Please try again in ${retryAfter}s.`,
+        );
+        setCountdown(retryAfter);
+      } else if (status === 401 || status === 422) {
         setError(msg || "Invalid email or password.");
       } else {
         setError("Something went wrong. Please try again.");
@@ -99,7 +124,7 @@ export default function LoginPage() {
             Your Account
           </h1>
           <p className="text-sm text-[#8a7968] font-light mb-10">
-              Don&apos;t have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/register"
               className="text-[#1a1714] font-medium underline underline-offset-4"
@@ -111,7 +136,9 @@ export default function LoginPage() {
           {/* Error banner */}
           {error && (
             <div className="mb-6 px-4 py-3 bg-[#c0735a]/10 border-l-2 border-[#c0735a] text-[0.8rem] text-[#c0735a]">
-              {error}
+              {countdown !== null
+                ? `You are doing this too fast. Please try again in ${countdown}s.`
+                : error}
             </div>
           )}
 
