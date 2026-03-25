@@ -53,23 +53,23 @@ export function SelectInput({
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const selected = options.find((o) => o.value === value);
-  const [searchQuery, setSearchQuery] = useState(
-    selected ? selected.label : "",
-  );
+  const selectedLabel = selected ? selected.label : "";
 
-  useEffect(() => {
-    if (selected) {
-      setSearchQuery(selected.label);
-    } else {
-      setSearchQuery("");
-    }
-  }, [selected]);
+  const [searchQuery, setSearchQuery] = useState(selectedLabel);
+  const [prevSelectedValue, setPrevSelectedValue] = useState(value);
+  const [prevOpen, setPrevOpen] = useState(open);
 
-  useEffect(() => {
+  if (value !== prevSelectedValue) {
+    setPrevSelectedValue(value);
+    setSearchQuery(selectedLabel);
+  }
+
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (!open) {
-      setSearchQuery(selected ? selected.label : "");
+      setSearchQuery(selectedLabel);
     }
-  }, [open, selected]);
+  }
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -218,7 +218,7 @@ export function SelectInput({
                     }}
                     className="text-[0.7rem] tracking-widest uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300 px-4 py-1.5 rounded-sm"
                   >
-                    {createNewText} "{searchQuery.trim()}"
+                    {createNewText} &quot;{searchQuery.trim()}&quot;
                   </button>
                 )}
               </div>
