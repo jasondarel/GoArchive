@@ -250,9 +250,14 @@ export default function BookDetailPage() {
             <p className="text-[0.65rem] tracking-[0.2em] uppercase text-[#c4a882] mb-2">
               Book Details
             </p>
-            <h1 className="font-serif text-4xl text-[#1a1714] leading-tight mb-4">
+            <h1 className="font-serif text-4xl text-[#1a1714] leading-tight mb-1">
               {book.title}
             </h1>
+            {book.author && (
+              <p className="text-sm tracking-wide uppercase text-[#b0a090] mb-4">
+                by {book.author.name}
+              </p>
+            )}
 
             {/* Book Attributes */}
             <div className="flex items-center gap-0 mb-6 divide-x divide-[#d4b896]/30">

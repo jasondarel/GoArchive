@@ -3,6 +3,7 @@
 GoArchive is a modern, responsive full-stack e-library application. It allows users to browse a catalog of books, filter by genre, year, and rating, and seamlessly save their favorites.
 
 ## ✨ Features
+
 - **Authentication**: JWT-based authentication using Laravel Sanctum.
 - **User Roles**: Distinct permissions for regular users and administrators.
 - **Catalog Browsing**: Intelligent search, filtering, and sorting of books.
@@ -11,15 +12,18 @@ GoArchive is a modern, responsive full-stack e-library application. It allows us
 - **Responsive UI**: Carefully crafted and responsive frontend built with Tailwind CSS.
 
 ## 🛠 Tech Stack
+
 - **Frontend**: Next.js 15, React, Tailwind CSS, TypeScript
 - **Backend**: Laravel 11, PHP 8.2+
 - **Database**: PostgreSQL
 
 ## 📋 Prerequisites
+
 Ensure you have the following installed if running manually (Option B):
--  **PHP 8.2+** & **Composer**
--  **Node.js 18+** & **npm**
--  **PostgreSQL**
+
+- **PHP 8.2+** & **Composer**
+- **Node.js 18+** & **npm**
+- **PostgreSQL**
 
 ---
 
@@ -67,23 +71,32 @@ Docker creates a Linux-style symlink for `public/storage` that Windows can't rea
 **Base URL**: `http://localhost:8000/api`
 
 ### Authentication
+
 - `POST /auth/register` - Register a new user (`name`, `email`, `password`, `password_confirmation`)
 - `POST /auth/login` - Authenticate and receive Sanctum API token (`email`, `password`)
-- `POST /auth/logout` - Invalidate current session/token *(Requires Auth)*
-- `GET /auth/me` - Get current authenticated user details *(Requires Auth)*
+- `POST /auth/logout` - Invalidate current session/token _(Requires Auth)_
+- `GET /auth/me` - Get current authenticated user details _(Requires Auth)_
 
 ### Books
-- `GET /books` - List the catalog and get a paginated list of books. 
+
+- `GET /books` - List the catalog and get a paginated list of books.
   - **Query Params:** `search`, `genre`, `year_min`, `year_max`, `rating_min`, `sort` (`title_asc`, `title_desc`, `year_asc`, `year_desc`, `rating_asc`, `rating_desc`, `newest`)
-  - *Optional Auth*: If a valid token is provided, includes an `is_favorited` flag.
-- `GET /books/{id}` - Get specific book details. *(Requires Auth)*
-- `POST /books` - Create a new book. Fields: `title`, `description`, `image`, `genre_id`, `year`, `rating` *(Requires Admin Auth)*
-- `POST /books/{id}` (also `PUT`) - Update an existing book with form-data *(Requires Admin Auth)*
-- `DELETE /books/{id}` - Delete a book *(Requires Admin Auth)*
+  - _Optional Auth_: If a valid token is provided, includes an `is_favorited` flag.
+- `GET /books/{id}` - Get specific book details. _(Requires Auth)_
+- `POST /books` - Create a new book. Fields: `title`, `description`, `image`, `genre_id`, `author_id`, `year`, `rating` _(Requires Admin Auth)_
+- `POST /books/{id}` (also `PUT`) - Update an existing book with form-data _(Requires Admin Auth)_
+- `DELETE /books/{id}` - Delete a book _(Requires Admin Auth)_
 
 ### Favorites
-- `GET /favorites` - Get the authenticated user's favorited books. Accepts same query params as `/books`. *(Requires Auth)*
-- `POST /favorites/{id}` - Toggle a book's favorite status. Returns `is_favorited` boolean status. *(Requires Auth)*
+
+- `GET /favorites` - Get the authenticated user's favorited books. Accepts same query params as `/books`. _(Requires Auth)_
+- `POST /favorites/{id}` - Toggle a book's favorite status. Returns `is_favorited` boolean status. _(Requires Auth)_
 
 ### Genres
+
 - `GET /genres` - List all available book genres.
+
+### Authors
+
+- `GET /authors` - List all available book authors.
+- `POST /authors` - Create a new author. Fields: `name`, `bio` _(Requires Admin Auth)_

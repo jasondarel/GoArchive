@@ -14,6 +14,11 @@ interface Genre {
   name: string;
 }
 
+interface Author {
+  id: number;
+  name: string;
+}
+
 interface BookFormModalProps {
   onClose: () => void;
   onSuccess: () => void;
@@ -29,10 +34,12 @@ export default function BookFormModal({
     title: editBook?.title || "",
     description: editBook?.description || "",
     genre_id: editBook?.genre?.id?.toString() || "",
+    author_id: editBook?.author?.id?.toString() || "",
     year: editBook?.year?.toString() || "",
     rating: editBook?.rating?.toString() || "",
   });
   const [genres, setGenres] = useState<Genre[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     editBook?.image_url || null,
@@ -48,6 +55,10 @@ export default function BookFormModal({
     api
       .get("/genres")
       .then((res) => setGenres(res.data))
+      .catch(() => {});
+    api
+      .get("/authors")
+      .then((res) => setAuthors(res.data))
       .catch(() => {});
   }, []);
 
@@ -90,6 +101,21 @@ export default function BookFormModal({
     e.preventDefault();
     setError(null);
     setFieldErrors({});
+
+    const errors: Record<string, string> = {};
+    if (!form.title.trim()) errors.title = "Title is required";
+    if (!form.description.trim())
+      errors.description = "Description is required";
+    if (!form.genre_id) errors.genre_id = "Genre is required";
+    if (!form.author_id) errors.author_id = "Author is required";
+    if (!form.year) errors.year = "Year is required";
+    if (!form.rating) errors.rating = "Rating is required";
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -97,6 +123,7 @@ export default function BookFormModal({
       data.append("title", form.title);
       data.append("description", form.description);
       if (form.genre_id) data.append("genre_id", form.genre_id);
+      if (form.author_id) data.append("author_id", form.author_id);
       if (form.year) data.append("year", form.year);
       if (form.rating) data.append("rating", form.rating);
       if (imageFile) data.append("image", imageFile);
@@ -158,6 +185,11 @@ export default function BookFormModal({
   const genreOptions = genres.map((g) => ({
     value: g.id.toString(),
     label: g.name,
+  }));
+
+  const authorOptions = authors.map((a) => ({
+    value: a.id.toString(),
+    label: a.name,
   }));
 
   return (
@@ -306,22 +338,45 @@ export default function BookFormModal({
             </div>
           </div>
 
-          {/* Genre */}
-          <div>
-            <label className={labelClass}>Genre</label>
-            <SelectInput
-              value={form.genre_id}
-              onChange={updateDirect("genre_id")}
-              options={genreOptions}
-              placeholder="— Select a genre —"
-              disabled={isLoading}
-              placement="top"
-            />
-            {fieldErrors.genre_id && (
-              <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
-                {fieldErrors.genre_id}
-              </p>
-            )}
+          {/* Genre and Author row */}
+          <div className="flex gap-5">
+            {/* Genre */}
+            <div className="flex-1">
+              <label className={labelClass}>Genre</label>
+              <SelectInput
+                value={form.genre_id}
+                onChange={updateDirect("genre_id")}
+                options={genreOptions}
+                placeholder="— Select a genre —"
+                disabled={isLoading}
+                placement="top"
+                searchable
+              />
+              {fieldErrors.genre_id && (
+                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                  {fieldErrors.genre_id}
+                </p>
+              )}
+            </div>
+
+            {/* Author */}
+            <div className="flex-1">
+              <label className={labelClass}>Author</label>
+              <SelectInput
+                value={form.author_id}
+                onChange={updateDirect("author_id")}
+                options={authorOptions}
+                placeholder="— Select an author —"
+                disabled={isLoading}
+                placement="top"
+                searchable
+              />
+              {fieldErrors.author_id && (
+                <p className="text-[0.72rem] text-[#c0735a] mt-1.5">
+                  {fieldErrors.author_id}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Year + Rating row */}

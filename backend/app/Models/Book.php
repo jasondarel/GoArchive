@@ -15,6 +15,7 @@ class Book extends Model
         'description',
         'image_path',
         'genre_id',
+        'author_id',
         'year',
         'rating',
     ];
@@ -36,6 +37,11 @@ class Book extends Model
     public function genre()
     {
         return $this->belongsTo(Genre::class);
+    }
+
+    public function author()
+    {
+        return $this->belongsTo(Author::class);
     }
 
     public function favorites()

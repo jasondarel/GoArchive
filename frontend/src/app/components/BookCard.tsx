@@ -14,6 +14,7 @@ export interface Book {
   is_favorited?: boolean;
   user?: { id: number; name: string };
   genre?: { id: number; name: string };
+  author?: { id: number; name: string };
   year?: number | null;
   rating?: number | null;
   favorites_count?: number;
@@ -235,11 +236,16 @@ export default function BookCard({
       {/* Info */}
       <div className="p-4 flex flex-col flex-1">
         <h3
-          className="font-serif text-[0.95rem] text-[#1a1714] leading-snug mb-1.5 line-clamp-2 min-h-[2.75em] cursor-pointer hover:text-[#c4a882] transition-colors"
+          className="font-serif text-[0.95rem] text-[#1a1714] leading-snug mb-0.5 line-clamp-2 min-h-[1.5em] cursor-pointer hover:text-[#c4a882] transition-colors"
           onClick={() => router.push(`/catalog/${book.id}`)}
         >
           {book.title}
         </h3>
+        {book.author && (
+          <p className="text-[0.65rem] tracking-wider uppercase text-[#c4a882] mb-1.5 line-clamp-1">
+            by {book.author.name}
+          </p>
+        )}
         <p className="text-[0.75rem] text-[#8a7968] font-light leading-relaxed line-clamp-3 min-h-[4.875em] flex-1">
           {book.description}
         </p>

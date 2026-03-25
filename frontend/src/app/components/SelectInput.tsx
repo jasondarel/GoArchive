@@ -32,6 +32,7 @@ interface SelectInputProps {
   placeholder?: string;
   disabled?: boolean;
   placement?: "top" | "bottom";
+  searchable?: boolean;
 }
 
 export function SelectInput({
@@ -41,11 +42,30 @@ export function SelectInput({
   placeholder = "— Select —",
   disabled,
   placement = "bottom",
+  searchable = false,
 }: SelectInputProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const selected = options.find((o) => o.value === value);
+  const [searchQuery, setSearchQuery] = useState(
+    selected ? selected.label : "",
+  );
+
+  useEffect(() => {
+    if (selected) {
+      setSearchQuery(selected.label);
+    } else {
+      setSearchQuery("");
+    }
+  }, [selected]);
+
+  useEffect(() => {
+    if (!open) {
+      setSearchQuery(selected ? selected.label : "");
+    }
+  }, [open, selected]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -71,27 +91,75 @@ export function SelectInput({
     setOpen(false);
   };
 
+  const filteredOptions = options.filter((o) =>
+    o.label.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   return (
     <div ref={ref} className="relative">
       {/* Trigger */}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setOpen((prev) => !prev)}
+      <div
         className={[
-          "w-full flex items-center justify-between border-b pb-2.5 text-[0.9375rem] transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
+          "w-full flex items-center justify-between border-b pb-2.5 text-[0.9375rem] transition-colors focus-within:border-[#1a1714]",
           open
             ? "border-[#1a1714]"
             : "border-[#c4a882]/50 hover:border-[#c4a882]",
-          selected ? "text-[#1a1714]" : "text-[#c4a882]/50",
+          disabled ? "opacity-50 cursor-not-allowed" : "cursor-text",
         ].join(" ")}
+        onClick={() => {
+          if (!disabled) {
+            setOpen(true);
+            if (searchable && searchInputRef.current) {
+              searchInputRef.current.focus();
+            }
+          }
+        }}
       >
-        <span>{selected ? selected.label : placeholder}</span>
-        <ChevronDown
-          size={14}
-          className={`text-[#c4a882] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
+        {searchable ? (
+          <input
+            ref={searchInputRef}
+            type="text"
+            disabled={disabled}
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setOpen(true);
+            }}
+            placeholder={placeholder}
+            className="w-full bg-transparent focus:outline-none text-[#1a1714] placeholder-[#c4a882]/50 disabled:cursor-not-allowed"
+          />
+        ) : (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((prev) => !prev);
+            }}
+            className={`w-full text-left focus:outline-none ${
+              selected ? "text-[#1a1714]" : "text-[#c4a882]/50"
+            }`}
+          >
+            {selected ? selected.label : placeholder}
+          </button>
+        )}
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((prev) => !prev);
+          }}
+          className="ml-2 focus:outline-none"
+        >
+          <ChevronDown
+            size={14}
+            className={`text-[#c4a882] transition-transform duration-200 ${
+              open ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+      </div>
 
       {/* Dropdown panel */}
       {open && (
@@ -131,29 +199,35 @@ export function SelectInput({
               } as React.CSSProperties
             }
           >
-            {options.map((opt) => {
-              const isActive = opt.value === value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => handleSelect(opt.value)}
-                  className={[
-                    "w-full text-left px-4 py-2.5 text-[0.9rem] transition-colors flex items-center justify-between group",
-                    isActive
-                      ? "bg-[#1a1714] text-[#f5f0e8]"
-                      : "text-[#1a1714] hover:bg-[#ede8de]",
-                  ].join(" ")}
-                >
-                  <span>{opt.label}</span>
-                  {isActive && (
-                    <span className="text-[#c4a882] text-[0.6rem] tracking-[0.15em] uppercase">
-                      selected
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            {filteredOptions.length === 0 ? (
+              <div className="px-4 py-3 text-[0.8rem] text-[#8a7968] italic text-center">
+                No results found
+              </div>
+            ) : (
+              filteredOptions.map((opt) => {
+                const isActive = opt.value === value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => handleSelect(opt.value)}
+                    className={[
+                      "w-full text-left px-4 py-2.5 text-[0.9rem] transition-colors flex items-center justify-between group",
+                      isActive
+                        ? "bg-[#1a1714] text-[#f5f0e8]"
+                        : "text-[#1a1714] hover:bg-[#ede8de]",
+                    ].join(" ")}
+                  >
+                    <span>{opt.label}</span>
+                    {isActive && (
+                      <span className="text-[#c4a882] text-[0.6rem] tracking-[0.15em] uppercase">
+                        selected
+                      </span>
+                    )}
+                  </button>
+                );
+              })
+            )}
           </div>
 
           {placement === "top" && (
