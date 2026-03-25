@@ -33,6 +33,8 @@ interface SelectInputProps {
   disabled?: boolean;
   placement?: "top" | "bottom";
   searchable?: boolean;
+  onCreateNew?: (inputValue: string) => void;
+  createNewText?: string;
 }
 
 export function SelectInput({
@@ -43,6 +45,8 @@ export function SelectInput({
   disabled,
   placement = "bottom",
   searchable = false,
+  onCreateNew,
+  createNewText = "Add new",
 }: SelectInputProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -200,8 +204,23 @@ export function SelectInput({
             }
           >
             {filteredOptions.length === 0 ? (
-              <div className="px-4 py-3 text-[0.8rem] text-[#8a7968] italic text-center">
-                No results found
+              <div className="px-4 py-3 text-center flex flex-col items-center gap-2">
+                <span className="text-[0.8rem] text-[#8a7968] italic">
+                  No results found
+                </span>
+                {onCreateNew && searchQuery.trim() && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpen(false);
+                      onCreateNew(searchQuery.trim());
+                    }}
+                    className="text-[0.7rem] tracking-widest uppercase font-medium bg-[#1a1714] text-[#f5f0e8] hover:bg-[#d4b896] hover:text-[#1a1714] transition-colors duration-300 px-4 py-1.5 rounded-sm"
+                  >
+                    {createNewText} "{searchQuery.trim()}"
+                  </button>
+                )}
               </div>
             ) : (
               filteredOptions.map((opt) => {
