@@ -143,7 +143,7 @@ export default function LoginPage() {
 
           {/* Error banner */}
           {error && (
-            <div className="mb-6 px-4 py-3 bg-[#c0735a]/10 border-l-2 border-[#c0735a] text-[0.8rem] text-[#c0735a]">
+            <div data-testid="error-banner" className="mb-6 px-4 py-3 bg-[#c0735a]/10 border-l-2 border-[#c0735a] text-[0.8rem] text-[#c0735a]">
               {countdown !== null
                 ? `You are doing this too fast. Please try again in ${countdown}s.`
                 : error}

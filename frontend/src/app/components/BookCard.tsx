@@ -140,7 +140,7 @@ export default function BookCard({
   }
 
   return (
-    <div className="group relative flex flex-col bg-[#f5f0e8] border border-[#d4b896]/20 hover:border-[#d4b896]/60 transition-all duration-300 hover:-translate-y-1">
+    <div data-testid="book-card" className="group relative flex flex-col bg-[#f5f0e8] border border-[#d4b896]/20 hover:border-[#d4b896]/60 transition-all duration-300 hover:-translate-y-1">
       {/* Cover */}
       <div className="relative aspect-2/3 overflow-hidden bg-[#2c2420]">
         {book.image_url ? (
@@ -209,6 +209,7 @@ export default function BookCard({
 
             {/* Main favorite button */}
             <button
+              data-testid="favorite-btn"
               onClick={handleFavoriteClick}
               className="w-6 h-6 rounded-full flex items-center justify-center bg-[#1a1714]/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#1a1714]"
               style={{
